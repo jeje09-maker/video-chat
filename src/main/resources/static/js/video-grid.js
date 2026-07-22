@@ -1,19 +1,37 @@
 document.addEventListener("DOMContentLoaded", function () {
     const memberVideosContainer = document.getElementById("memberVideosContainer");
+    const videoContainer = document.getElementById("videoContainer");
 
     function updateGrid() {
+        const isSpeaker = document.body.classList.contains('layout-speaker');
         const currentSlots = memberVideosContainer.children.length;
-        if (currentSlots === 0) return;
+        
+        if (isSpeaker) {
+            // 발표자 모드에서는 멤버 패널 내부의 단순 세로 배치
+            videoContainer.style.gridTemplateColumns = '';
+            videoContainer.style.gridTemplateRows = '';
+            
+            memberVideosContainer.style.gridTemplateColumns = '1fr';
+            memberVideosContainer.style.gridTemplateRows = `repeat(${currentSlots}, minmax(150px, auto))`;
+        } else {
+            // 타일 모드에서는 전체 컨테이너가 그리드
+            memberVideosContainer.style.gridTemplateColumns = '';
+            memberVideosContainer.style.gridTemplateRows = '';
 
-        const containerWidth = memberVideosContainer.clientWidth;
-        const containerHeight = memberVideosContainer.clientHeight;
-        const aspectRatio = containerWidth / containerHeight || 1;
+            const totalParticipants = currentSlots + 1; // 멤버들 + 방장(1명)
+            let columns = 1;
+            let rows = 1;
 
-        let columns = Math.ceil(Math.sqrt(currentSlots * aspectRatio));
-        let rows = Math.ceil(currentSlots / columns);
+            if (totalParticipants === 1) { columns = 1; rows = 1; }
+            else if (totalParticipants === 2) { columns = 2; rows = 1; }
+            else if (totalParticipants === 3 || totalParticipants === 4) { columns = 2; rows = 2; }
+            else if (totalParticipants === 5 || totalParticipants === 6) { columns = 3; rows = 2; }
+            else if (totalParticipants >= 7 && totalParticipants <= 9) { columns = 3; rows = 3; }
+            else { columns = 4; rows = 3; } // 10명 이상
 
-        memberVideosContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-        memberVideosContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            videoContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
+            videoContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+        }
     }
 
     function createVideoSlot(sessionId) {

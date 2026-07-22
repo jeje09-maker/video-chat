@@ -370,3 +370,18 @@ body.layout-speaker #memberVideosContainer.show {
     transform: scale(1.15);
     transition: transform 0.15s ease, opacity 0.15s ease;
 }
+
+/* 타일 보기 모드 (layout-speaker가 없을 때) */
+body:not(.layout-speaker) #videoContainer {
+    display: grid !important;
+    gap: 2px;
+    background-color: #111;
+}
+body:not(.layout-speaker) #managerVideoContainer {
+    width: 100% !important;
+    height: 100% !important;
+}
+body:not(.layout-speaker) #memberVideosContainer {
+    display: contents !important;
+}
+

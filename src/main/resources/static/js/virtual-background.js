@@ -16,6 +16,7 @@ let animationId = null;
  * 직접 managerVideo의 srcObject를 교체하는 방식으로 동작
  */
 window.setVirtualBackground = function(type) {
+    const wasPipelineRunning = (bgType !== 'none');
     bgType = type;
 
     if (type !== 'none' && type !== 'blur') {
@@ -32,7 +33,9 @@ window.setVirtualBackground = function(type) {
     } else {
         // 캔버스 파이프라인 시작
         if (!selfieSegmentation) initSegmentation();
-        _startCanvasPipeline();
+        if (!wasPipelineRunning) {
+            _startCanvasPipeline();
+        }
     }
 };
 
