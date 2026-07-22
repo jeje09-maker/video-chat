@@ -3,5 +3,13 @@ spring:
     name: videochat
   thymeleaf:
     cache: false
+  web:
+    resources:
+      cache:
+        period: 0
+        cachecontrol:
+          no-cache: true
+          no-store: true
+          must-revalidate: true
 server:
   port: 9443
