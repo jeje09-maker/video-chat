@@ -16,7 +16,7 @@
 
     <title>CODEGRASS - VIDEOCHAT</title>
 </head>
-<body>
+<body class="layout-speaker">
 
 <div id="videoContainer">
     <!-- 매니저 비디오 (왼쪽 절반) -->
@@ -35,11 +35,13 @@
 
         <!-- 메뉴바 추가 -->
         <div id="managerMenuBar">
+            <button id="toggleViewBtn" onclick="window.toggleViewMode()" style="background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">타일 보기</button>
+            <button id="toggleMemberVideoBtn" onclick="window.toggleMemberVideoPanel()" style="background-color: #17a2b8; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">참가자 영상</button>
             <button id="toggleChatBtn" onclick="const p = document.getElementById('chatPanel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none';" style="background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">채팅하기</button>
             <button id="inviteBtn" onclick="window.copyInviteLink()" style="background-color: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">초대하기</button>
             <button id="toggleCameraBtn" onclick="window.toggleCamera()" style="background-color: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px;">카메라 끄기</button>
-            <button id="toggleScreenShare"></button>
-            <button id="toggleMemberListPanel"></button>
+            <button id="toggleScreenShare" style="background-color: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold; background-image: none; width: auto; height: auto;">화면 공유</button>
+            <button id="toggleMemberListPanel" style="background-color: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold; background-image: none; width: auto; height: auto;">참가자 명단</button>
         </div>
     </div>
 

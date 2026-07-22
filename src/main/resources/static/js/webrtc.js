@@ -800,6 +800,200 @@ function appendChatMessage(sender, msg, isMe) {
         div.innerHTML = `<span>${msg}</span>`;
     } else {
         div.style.alignSelf = "flex-start";
+// ice-candidate 수신
+async function handleIceCandidate(sessionId, candidate) {
+    console.log('[ice-candidate] 수신')
+    const peerConnection = peerConnections[sessionId];
+
+    try {
+        const parsedCandidate = new RTCIceCandidate(JSON.parse(candidate));
+        await peerConnection.addIceCandidate(parsedCandidate);
+    } catch (error) {
+        console.error("ICE 후보 처리 중 오류 발생:", error);
+    }
+}
+
+// microphone 전송
+function sendMicrophone(value) {
+    console.log('[microphone] 전송')
+
+    const sessionId = document.getElementById('videoModalSessionId').value;
+    if (sessionId) {
+
+        const microphoneControlBtn = document.getElementById('microphoneControlBtn');
+
+        let isEnabled;
+
+        // 모달 창 닫기
+        if (value === false) {
+            microphoneControlBtn.style.backgroundImage = "url('/images/mic-enabled-false.png')";
+            document.getElementById('microphoneIsEnabled').value = 'false';
+            isEnabled = 'false';
+
+            // inEnabled 토글 처리
+        } else {
+            isEnabled = document.getElementById('microphoneIsEnabled').value;
+            if (isEnabled === 'false') {
+                microphoneControlBtn.style.backgroundImage = "url('/images/mic-enabled-true.png')";
+                document.getElementById('microphoneIsEnabled').value = 'true';
+                isEnabled = 'true';
+
+            } else if (isEnabled === 'true') {
+                microphoneControlBtn.style.backgroundImage = "url('/images/mic-enabled-false.png')";
+                document.getElementById('microphoneIsEnabled').value = 'false';
+                isEnabled = 'false';
+
+            } else {
+                console.log('isEnabled 값이 없습니다.');
+                return;
+            }
+        }
+
+        socket.send(JSON.stringify({
+            event: 'microphone',
+            isEnabled: isEnabled,
+            sessionId: mySessionId,
+            recipientSessionId: sessionId
+        }));
+
+    } else {
+        console.log('[microphone] sessionId 값이 없습니다.')
+    }
+}
+
+// microphone 수신
+async function handleMicrophone(sessionId, isEnabled) {
+    console.log('[microphone] 수신');
+
+    if (peerConnections[sessionId]) {
+        console.log('[microphone] isEnabled : ', isEnabled);
+        window.localStream.getAudioTracks().forEach(track => {
+            if (isEnabled === 'true') {
+                track.enabled = true;
+            } else if (isEnabled === 'false') {
+                track.enabled = false;
+            }
+        });
+    }
+}
+
+// kick 수신
+async function handleKick(sessionId) {
+    console.log('[kick] 수신');
+
+    if (peerConnections[sessionId]) {
+        window.location.href = `/videoChat/${roomId}/kickedOut`;
+    }
+}
+
+// refresh 수신
+async function handleRefresh(sessionId) {
+    console.log('[refresh] 수신');
+
+    if (peerConnections[sessionId]) {
+        window.location.reload();
+    }
+}
+
+// WebRTC Offer/Answer 처리를 순차적으로 실행하는 Queue
+class SignalingQueue {
+    constructor() {
+        this.queue = [];
+        this.processing = false;
+    }
+
+    async enqueue(task) {
+        this.queue.push(task);
+        await this.processQueue();
+    }
+
+    async processQueue() {
+        if (this.processing || this.queue.length === 0) return;
+
+        this.processing = true;
+        while (this.queue.length > 0) {
+            const task = this.queue.shift();
+            await task();  // 작업 실행
+        }
+        this.processing = false;
+    }
+}
+
+// 카메라 켜기/끄기 기능
+function toggleCamera() {
+    if (window.localStream) {
+        const videoTracks = window.localStream.getVideoTracks();
+        if (videoTracks.length > 0) {
+            const track = videoTracks[0];
+            track.enabled = !track.enabled; // 상태 반전
+
+            const btn = document.getElementById("toggleCameraBtn");
+            if (btn) {
+                // 필요 시 이미지/텍스트 변경 (현재는 텍스트로 처리)
+                btn.innerText = track.enabled ? "카메라 끄기" : "카메라 켜기";
+            }
+        }
+    }
+}
+window.toggleCamera = toggleCamera;
+
+// 초대 링크 복사 기능
+function copyInviteLink() {
+    const rId = window.location.pathname.split("/")[2];
+    const inviteUrl = window.location.origin + "/videoChat/" + rId + "/member";
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+        alert("채팅방 초대 링크가 복사되었습니다!\n원하는 곳에 붙여넣기(Ctrl+V) 하여 사람들을 초대하세요.\n" + inviteUrl);
+    }).catch(err => {
+        console.error("초대 링크 복사 실패", err);
+        alert("초대 링크 복사에 실패했습니다. 브라우저 권한을 확인해주세요.");
+    });
+}
+window.copyInviteLink = copyInviteLink;
+
+// ---------------------- 채팅 기능 ----------------------
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    // 화면에 내 메시지 표시
+    appendChatMessage("나", msg, true);
+    input.value = '';
+
+    // 서버로 전송
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            event: 'chat',
+            sessionId: mySessionId || "나",
+            message: msg
+        }));
+    }
+}
+window.sendChatMessage = sendChatMessage;
+
+function receiveChatMessage(senderId, msg) {
+    appendChatMessage(senderId, msg, false);
+}
+window.receiveChatMessage = receiveChatMessage;
+
+function appendChatMessage(sender, msg, isMe) {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.style.maxWidth = "80%";
+    div.style.padding = "8px 12px";
+    div.style.borderRadius = "8px";
+    div.style.marginBottom = "5px";
+    div.style.wordBreak = "break-word";
+    
+    if (isMe) {
+        div.style.alignSelf = "flex-end";
+        div.style.backgroundColor = "#007bff";
+        div.style.color = "white";
+        div.innerHTML = `<span>${msg}</span>`;
+    } else {
+        div.style.alignSelf = "flex-start";
         div.style.backgroundColor = "#e9ecef";
         div.style.color = "black";
         div.innerHTML = `<span style="font-size: 0.8em; color: #555; margin-bottom: 3px; display: block; font-weight: bold;">${sender}</span><span>${msg}</span>`;
@@ -809,3 +1003,44 @@ function appendChatMessage(sender, msg, isMe) {
     container.scrollTop = container.scrollHeight;
 }
 window.appendChatMessage = appendChatMessage;
+
+// ---------------------- 뷰 모드 및 패널 토글 기능 ----------------------
+window.toggleViewMode = function() {
+    const isSpeaker = document.body.classList.contains('layout-speaker');
+    const btn = document.getElementById('toggleViewBtn');
+    const panel = document.getElementById('memberVideosContainer');
+    
+    if (isSpeaker) {
+        // 발표자 -> 타일 모드로 전환
+        document.body.classList.remove('layout-speaker');
+        panel.classList.remove('show'); // 혹시 열려있던 슬라이드 패널 초기화
+        if (btn) btn.innerText = "발표자 보기";
+        
+        // 그리드 레이아웃 갱신
+        setTimeout(() => {
+            if (typeof window.updateGrid === 'function') window.updateGrid();
+        }, 100);
+    } else {
+        // 타일 -> 발표자 모드로 전환
+        document.body.classList.add('layout-speaker');
+        if (btn) btn.innerText = "타일 보기";
+        // 발표자 모드일 때는 기본적으로 참가자 영상 패널을 숨김 (필요시 직접 열게 함)
+    }
+};
+
+window.toggleMemberVideoPanel = function() {
+    // 이 기능은 발표자 모드(layout-speaker)일 때만 유효함
+    if (!document.body.classList.contains('layout-speaker')) {
+        alert("타일 보기 모드에서는 이미 모든 영상이 화면에 표시되고 있습니다.");
+        return;
+    }
+    
+    const panel = document.getElementById('memberVideosContainer');
+    if (!panel) return;
+    
+    if (panel.classList.contains('show')) {
+        panel.classList.remove('show');
+    } else {
+        panel.classList.add('show');
+    }
+};
