@@ -844,6 +844,15 @@ function appendChatMessage(sender, msg, isMe) {
         div.innerHTML = `<span>${msg}</span>`;
     } else {
         div.style.alignSelf = "flex-start";
+        div.style.backgroundColor = "#f0f0f0";
+        div.style.color = "#333";
+        div.innerHTML = `<strong>${sender}:</strong> ${msg}`;
+    }
+
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+
 // ice-candidate 수신
 async function handleIceCandidate(sessionId, candidate) {
     console.log('[ice-candidate] 수신')
@@ -939,47 +948,7 @@ async function handleRefresh(sessionId) {
     }
 }
 
-// WebRTC Offer/Answer 처리를 순차적으로 실행하는 Queue
-class SignalingQueue {
-    constructor() {
-        this.queue = [];
-        this.processing = false;
-    }
 
-    async enqueue(task) {
-        this.queue.push(task);
-        await this.processQueue();
-    }
-
-    async processQueue() {
-        if (this.processing || this.queue.length === 0) return;
-
-        this.processing = true;
-        while (this.queue.length > 0) {
-            const task = this.queue.shift();
-            await task();  // 작업 실행
-        }
-        this.processing = false;
-    }
-}
-
-// 카메라 켜기/끄기 기능
-function toggleCamera() {
-    if (window.localStream) {
-        const videoTracks = window.localStream.getVideoTracks();
-        if (videoTracks.length > 0) {
-            const track = videoTracks[0];
-            track.enabled = !track.enabled; // 상태 반전
-
-            const btn = document.getElementById("toggleCameraBtn");
-            if (btn) {
-                // 필요 시 이미지/텍스트 변경 (현재는 텍스트로 처리)
-                btn.innerText = track.enabled ? "카메라 끄기" : "카메라 켜기";
-            }
-        }
-    }
-}
-window.toggleCamera = toggleCamera;
 
 // 초대 링크 복사 기능
 function copyInviteLink() {
