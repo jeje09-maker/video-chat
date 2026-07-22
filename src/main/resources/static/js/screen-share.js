@@ -5,6 +5,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
     document.getElementById("toggleScreenShare").addEventListener("click", async function () {
         const managerVideo = document.getElementById("managerVideo");
+        const localCameraVideo = document.getElementById("localCameraVideo"); // PiP 비디오
 
         if (!isScreenSharing) {
             console.log('화면공유 시작.');
@@ -13,6 +14,12 @@ document.addEventListener("DOMContentLoaded", function () {
 
                 if (!originalStream) originalStream = managerVideo.srcObject;
                 managerVideo.srcObject = screenStream; // 화면 공유 스트림을 비디오 태그에 적용
+                
+                // 내 카메라 스트림을 작은 화면에 띄우기
+                if (localCameraVideo && originalStream) {
+                    localCameraVideo.srcObject = originalStream;
+                    localCameraVideo.classList.add("show");
+                }
 
                 const videoTrack = screenStream.getVideoTracks()[0];
                 Object.values(peerConnections).forEach(peerConnection => {
@@ -43,9 +50,15 @@ document.addEventListener("DOMContentLoaded", function () {
     function stopScreenShare() {
         console.log('화면공유 종료.');
         const managerVideo = document.getElementById("managerVideo");
+        const localCameraVideo = document.getElementById("localCameraVideo"); // PiP 비디오
 
         if (originalStream) {
             managerVideo.srcObject = originalStream; // 원래 카메라 스트림 복원
+            
+            if (localCameraVideo) {
+                localCameraVideo.srcObject = null;
+                localCameraVideo.classList.remove("show");
+            }
             const cameraTrack = originalStream.getVideoTracks()[0];
             console.log('cameraTrack = ', cameraTrack)
 

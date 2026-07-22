@@ -287,3 +287,24 @@ video.memberVideo {
 #closeVideoModalBtn:hover {
     opacity: 1;
 }
+/* 내 얼굴 화면 (화면 공유 시 우측 하단 PiP) */
+#localCameraVideo {
+    display: none;
+    position: absolute;
+    bottom: 60px; /* 메뉴바 위로 올리기 */
+    right: 20px;
+    width: 200px;
+    height: 150px;
+    object-fit: cover;
+    border-radius: 12px;
+    border: 2px solid white;
+    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
+    z-index: 20;
+    transform: scaleX(-1); /* 거울 모드 (좌우 반전) */
+    transition: opacity 0.3s ease-in-out;
+}
+
+#localCameraVideo.show {
+    display: block;
+}
+
