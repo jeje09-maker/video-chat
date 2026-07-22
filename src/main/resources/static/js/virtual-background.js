@@ -1,16 +1,23 @@
-let bgType = 'none'; // 'none', 'blur', 'url...'
+/**
+ * virtual-background.js
+ * 배경 선택 시에만 활성화 - 초기 스트림은 절대 건드리지 않음
+ */
+
+let bgType = 'none';
 let bgImage = null;
 let selfieSegmentation = null;
-let activeOriginalStream = null;
-let activeCanvasStream = null;
 let hiddenVideo = null;
 let canvasElement = null;
 let canvasCtx = null;
 let animationId = null;
 
-// 배경 선택 시 즉시 전환
+/**
+ * 배경 선택 버튼 클릭 시 호출
+ * 직접 managerVideo의 srcObject를 교체하는 방식으로 동작
+ */
 window.setVirtualBackground = function(type) {
     bgType = type;
+
     if (type !== 'none' && type !== 'blur') {
         bgImage = new Image();
         bgImage.crossOrigin = 'Anonymous';
@@ -19,24 +26,28 @@ window.setVirtualBackground = function(type) {
         bgImage = null;
     }
 
-    if (bgType !== 'none') {
-        // 배경 효과가 필요하면 캔버스 파이프라인 시작
-        if (!activeCanvasStream && activeOriginalStream) {
-            _startCanvasPipeline(activeOriginalStream).then(cs => {
-                // managerVideo 에 재연결
-                const mv = document.getElementById('managerVideo');
-                if (mv) mv.srcObject = cs;
-            });
-        }
-        if (!selfieSegmentation) initSegmentation();
+    if (bgType === 'none') {
+        // 원본 스트림 복원
+        _restoreOriginalStream();
     } else {
-        // 원본으로 복원
-        if (activeOriginalStream) {
-            const mv = document.getElementById('managerVideo');
-            if (mv) mv.srcObject = activeOriginalStream;
-        }
+        // 캔버스 파이프라인 시작
+        if (!selfieSegmentation) initSegmentation();
+        _startCanvasPipeline();
     }
 };
+
+function _restoreOriginalStream() {
+    if (!window.localStream) return;
+    const mv = document.getElementById('managerVideo');
+    if (mv) {
+        mv.srcObject = window.localStream;
+        mv.play().catch(() => {});
+    }
+    if (animationId) {
+        cancelAnimationFrame(animationId);
+        animationId = null;
+    }
+}
 
 function initSegmentation() {
     if (typeof SelfieSegmentation === 'undefined') {
@@ -67,7 +78,7 @@ function onResults(results) {
         canvasCtx.filter = 'none';
         canvasCtx.drawImage(bgImage, 0, 0, canvasElement.width, canvasElement.height);
     } else {
-        canvasCtx.fillStyle = '#222';
+        canvasCtx.fillStyle = '#111';
         canvasCtx.fillRect(0, 0, canvasElement.width, canvasElement.height);
     }
 
@@ -77,57 +88,55 @@ function onResults(results) {
     canvasCtx.restore();
 }
 
-async function _startCanvasPipeline(stream) {
+async function _startCanvasPipeline() {
+    if (!window.localStream) return;
+
+    const videoTrack = window.localStream.getVideoTracks()[0];
+    if (!videoTrack) return;
+
     if (!hiddenVideo) {
         hiddenVideo = document.createElement('video');
         hiddenVideo.autoplay = true;
         hiddenVideo.playsInline = true;
         hiddenVideo.muted = true;
-
         canvasElement = document.createElement('canvas');
         canvasCtx = canvasElement.getContext('2d');
     }
-
-    const videoTrack = stream.getVideoTracks()[0];
-    if (!videoTrack) return stream;
 
     const settings = videoTrack.getSettings();
     canvasElement.width  = settings.width  || 640;
     canvasElement.height = settings.height || 480;
 
     hiddenVideo.srcObject = new MediaStream([videoTrack]);
-    await new Promise(resolve => { hiddenVideo.onloadeddata = resolve; });
+    await new Promise(resolve => {
+        hiddenVideo.onloadeddata = resolve;
+        hiddenVideo.play().catch(() => resolve());
+    });
 
-    activeCanvasStream = canvasElement.captureStream(30);
-    stream.getAudioTracks().forEach(t => activeCanvasStream.addTrack(t));
+    const canvasStream = canvasElement.captureStream(30);
+    window.localStream.getAudioTracks().forEach(t => canvasStream.addTrack(t));
+
+    // managerVideo에 캔버스 스트림으로 교체
+    const mv = document.getElementById('managerVideo');
+    if (mv) {
+        mv.srcObject = canvasStream;
+        mv.play().catch(() => {});
+    }
+
+    // 이전 애니메이션 중단
+    if (animationId) cancelAnimationFrame(animationId);
 
     async function processFrame() {
-        if (hiddenVideo.paused || hiddenVideo.ended) {
-            animationId = requestAnimationFrame(processFrame);
-            return;
-        }
-        if (bgType === 'none') {
-            canvasCtx.drawImage(hiddenVideo, 0, 0, canvasElement.width, canvasElement.height);
-        } else if (selfieSegmentation) {
-            await selfieSegmentation.send({ image: hiddenVideo });
+        if (!hiddenVideo.paused && !hiddenVideo.ended && bgType !== 'none') {
+            if (selfieSegmentation) {
+                await selfieSegmentation.send({ image: hiddenVideo });
+            } else {
+                canvasCtx.drawImage(hiddenVideo, 0, 0, canvasElement.width, canvasElement.height);
+            }
+        } else if (bgType === 'none') {
+            return; // 원본으로 복원됐으면 루프 종료
         }
         animationId = requestAnimationFrame(processFrame);
     }
-
-    if (animationId) cancelAnimationFrame(animationId);
     processFrame();
-
-    return activeCanvasStream;
 }
-
-// getMediaStream() 이 호출하는 진입점 – bgType이 none이면 원본 스트림을 그냥 돌려줌
-window.processVirtualBackground = async function(stream) {
-    activeOriginalStream = stream;
-
-    if (bgType === 'none') {
-        // 배경 없음: 캔버스 파이프라인 없이 원본 스트림 직접 반환
-        return stream;
-    }
-
-    return await _startCanvasPipeline(stream);
-};
