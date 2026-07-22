@@ -68,10 +68,10 @@ socket.onmessage = async (event) => {
 
                 try {
                     window.localStream = await getMediaStream();
+                    console.log('[first-join] 스트림 취득 완료. 트랙:', window.localStream.getTracks().map(t => t.kind + ':' + t.readyState));
 
                 } catch (error) {
-
-                    window.localStream = new MediaStream(); // 빈 스트림 반환
+                    window.localStream = new MediaStream();
                     console.error("미디어 스트림 설정 실패:", error);
                 }
 
@@ -80,6 +80,18 @@ socket.onmessage = async (event) => {
 
                 // 멤버 화면 생성 (멤버일 경우 멤버 패널에도 띄움)
                 if (myType === 'member') addMemberVideo(message.sessionId, window.localStream);
+
+                // === 방장 본인도 참가자 목록에 추가 (member-panel.js 로딩 대기) ===
+                if (myType === 'manager') {
+                    const addSelfToList = () => {
+                        if (!window.members) { setTimeout(addSelfToList, 200); return; }
+                        if (!window.members.includes('나 (방장)')) {
+                            window.members.push('나 (방장)');
+                            if (typeof window.updateMemberList === 'function') window.updateMemberList();
+                        }
+                    };
+                    setTimeout(addSelfToList, 300);
+                }
             }
         }
 
@@ -253,10 +265,15 @@ function createSilentAudioTrack() {
     return destination.stream.getAudioTracks()[0];
 }
 
-// 관리자 화면 생성
+// 관리자 화면 생성 - 카메라 스트림을 managerVideo에 직접 연결
 function addManagerVideo(localStream) {
-    const managerVideo = document.getElementById("managerVideo");
+    const managerVideo = document.getElementById('managerVideo');
+    if (!managerVideo) { console.error('[addManagerVideo] managerVideo 엘리먼트를 찾을 수 없습니다.'); return; }
     managerVideo.srcObject = localStream;
+    // 자동재생 정책 대응: muted + play() 강제 호출
+    managerVideo.muted = true;
+    managerVideo.play().catch(e => console.warn('[addManagerVideo] play() 실패:', e));
+    console.log('[addManagerVideo] srcObject 연결 완료. 트랙:', localStream.getTracks().map(t => t.kind + ':' + t.readyState + ':enabled=' + t.enabled));
 }
 
 // 멤버 화면 생성 + 멤버 이름 노출 + 멤버 리스트에 이름 추가
