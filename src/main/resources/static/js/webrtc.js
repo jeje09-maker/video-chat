@@ -253,62 +253,55 @@ function addManagerVideo(localStream) {
 function addMemberVideo(sessionId, stream) {
     console.log(`[멤버화면생성] ${sessionId}`);
 
-    const memberVideosContainer = document.getElementById('memberVideosContainer');
+    // 이미 존재하는지 확인
+    if (document.getElementById("wrapper-" + sessionId)) return;
 
-    // `video-wrapper` 안에서 빈 `video` 찾기
-    const emptyWrapper = Array.from(memberVideosContainer.children).find(wrapper => {
-        const video = wrapper.querySelector("video");
-        return video && !video.srcObject; // video 태그가 있고, 태그 안이 비어있는 경우 찾기
-    });
+    if (typeof window.createVideoSlot !== "function") {
+        console.warn("createVideoSlot 함수가 준비되지 않았습니다.");
+        return;
+    }
 
-    if (emptyWrapper) {
-        const emptyVideoSlot = emptyWrapper.querySelector("video");
-        emptyVideoSlot.srcObject = stream;
-        emptyVideoSlot.id = sessionId;
-        
-        // 내(로컬) 스트림일 경우 하울링 방지 및 브라우저 자동 재생 정책을 위해 음소거
-        if (stream === window.localStream) {
-            emptyVideoSlot.muted = true;
+    const { videoWrapper, videoElement } = window.createVideoSlot(sessionId);
+    videoElement.srcObject = stream;
+
+    // 내(로컬) 스트림일 경우 하울링 방지 및 브라우저 자동 재생 정책을 위해 음소거
+    if (stream === window.localStream) {
+        videoElement.muted = true;
+    }
+
+    // 항상 새로운 `label`을 생성하여 추가
+    const label = document.createElement("span");
+    label.classList.add("video-label");
+    label.innerText = sessionId;
+    videoWrapper.appendChild(label); // `video-wrapper` 안에 추가
+
+    // 클릭한 비디오를 모달에 표시하는 이벤트 리스너 추가
+    if(myType === 'manager') {
+        videoElement.addEventListener("click", () => showVideoModal(videoElement));
+        videoElement.style.cursor = 'pointer';
+
+        // 마우스를 올렸을 때 테두리 추가
+        videoElement.addEventListener("mouseenter", () => {
+            videoElement.style.border = '2px solid #007bff';
+            videoElement.style.position = 'relative';
+            videoElement.style.zIndex = '10';
+        });
+
+        videoElement.addEventListener("mouseleave", () => {
+            videoElement.style.border = '';
+            videoElement.style.position = '';
+            videoElement.style.zIndex = '';
+        });
+    }
+
+    // 멤버리스트에 사용자 추가 (중복 방지) : member-panel.js의 members 배열에 추가
+    if (!window.members.includes(sessionId)) {
+        window.members.push(sessionId);
+
+        // 목록 업데이트 실행 (UI 반영)
+        if (typeof window.updateMemberList === "function") {
+            window.updateMemberList();
         }
-
-        // 항상 새로운 `label`을 생성하여 추가
-        const label = document.createElement("span");
-        label.classList.add("video-label");
-        label.innerText = sessionId;
-
-        emptyWrapper.appendChild(label); // `video-wrapper` 안에 추가
-
-        // 클릭한 비디오를 모달에 표시하는 이벤트 리스너 추가
-        if(myType === 'manager') {
-            emptyVideoSlot.addEventListener("click", () => showVideoModal(emptyVideoSlot));
-            emptyVideoSlot.style.cursor = 'pointer';
-
-            // 마우스를 올렸을 때 테두리 추가
-            emptyVideoSlot.addEventListener("mouseenter", () => {
-                emptyVideoSlot.style.border = '2px solid #007bff';
-                emptyVideoSlot.style.position = 'relative';
-                emptyVideoSlot.style.zIndex = '10';
-            });
-
-            emptyVideoSlot.addEventListener("mouseleave", () => {
-                emptyVideoSlot.style.border = '';
-                emptyVideoSlot.style.position = '';
-                emptyVideoSlot.style.zIndex = '';
-            });
-        }
-
-        // 멤버리스트에 사용자 추가 (중복 방지) : member-panel.js의 members 배열에 추가
-        if (!window.members.includes(sessionId)) {
-            window.members.push(sessionId);
-
-            // 목록 업데이트 실행 (UI 반영)
-            if (typeof window.updateMemberList === "function") {
-                window.updateMemberList();
-            }
-        }
-    } else {
-        console.warn('모든 슬롯이 이미 사용 중입니다.');
-        alert('채팅방 인원이 가득 찼습니다.');
     }
 }
 
@@ -372,26 +365,13 @@ async function removeMemberVideo(sessionId) {
     }
 
     // 원격 비디오 삭제
-    const remoteVideo = document.getElementById(sessionId);
-    if (remoteVideo) {
-        remoteVideo.srcObject = null; // 영상 제거
-        remoteVideo.removeAttribute("id"); // ID 제거 (슬롯 재사용 가능)
-        remoteVideo.style.backgroundImage = "url('/images/empty-slot.png')"; // 빈 슬롯 이미지 설정
-        remoteVideo.style.backgroundColor = "rgb(76, 78, 82)";
-        remoteVideo.style.backgroundSize = "40px";
-        remoteVideo.style.backgroundPosition = "center";
-        remoteVideo.style.backgroundRepeat = "no-repeat";
-
-        const videoWrapper = remoteVideo.parentElement;
-        if (videoWrapper) {
-            const label = videoWrapper.querySelector(".video-label");
-            if (label) {
-                label.remove(); // 멤버 이름 제거
-            }
+    const remoteVideoWrapper = document.getElementById("wrapper-" + sessionId);
+    if (remoteVideoWrapper) {
+        remoteVideoWrapper.remove(); // 동적으로 래퍼 자체를 삭제
+        
+        if (typeof window.updateGrid === "function") {
+            window.updateGrid();
         }
-
-        // 비디오 클릭 이벤트 제거
-        remoteVideo.replaceWith(remoteVideo.cloneNode(true));
     }
 
     // 멤버리스트에서 사용자 제거 (member-panel.js의 members 배열에서 제거)
@@ -734,3 +714,21 @@ class SignalingQueue {
         this.processing = false;
     }
 }
+
+// 카메라 켜기/끄기 기능
+function toggleCamera() {
+    if (window.localStream) {
+        const videoTracks = window.localStream.getVideoTracks();
+        if (videoTracks.length > 0) {
+            const track = videoTracks[0];
+            track.enabled = !track.enabled; // 상태 반전
+
+            const btn = document.getElementById("toggleCameraBtn");
+            if (btn) {
+                // 필요 시 이미지/텍스트 변경 (현재는 텍스트로 처리)
+                btn.innerText = track.enabled ? "카메라 끄기" : "카메라 켜기";
+            }
+        }
+    }
+}
+window.toggleCamera = toggleCamera;
