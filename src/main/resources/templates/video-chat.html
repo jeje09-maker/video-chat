@@ -6,10 +6,11 @@
     <link rel="shortcut icon" href="#">
     <link rel="stylesheet" href="/css/video-chat.css">
 
-    <!-- 구글 폰트 -->
+    <!-- 구글 폰트 & 아이콘 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+KR&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
     <!-- MediaPipe Selfie Segmentation -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
@@ -31,17 +32,35 @@
             <button onclick="window.setVirtualBackground('blur')">배경흐림</button>
             <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=60')">해변</button>
             <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=500&q=60')">사무실</button>
+            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=500&q=60')">산</button>
         </div>
 
         <!-- 메뉴바 추가 -->
-        <div id="managerMenuBar">
-            <button id="toggleViewBtn" onclick="window.toggleViewMode()" style="background-color: #6c757d; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">타일 보기</button>
-            <button id="toggleMemberVideoBtn" onclick="window.toggleMemberVideoPanel()" style="background-color: #17a2b8; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">참가자 영상</button>
-            <button id="toggleChatBtn" onclick="const p = document.getElementById('chatPanel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none';" style="background-color: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">채팅하기</button>
-            <button id="inviteBtn" onclick="window.copyInviteLink()" style="background-color: #28a745; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold;">초대하기</button>
-            <button id="toggleCameraBtn" onclick="window.toggleCamera()" style="background-color: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px;">카메라 끄기</button>
-            <button id="toggleScreenShare" style="background-color: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold; background-image: none; width: auto; height: auto;">화면 공유</button>
-            <button id="toggleMemberListPanel" style="background-color: #333; color: white; border: none; padding: 10px; border-radius: 5px; cursor: pointer; margin-right: 10px; font-weight: bold; background-image: none; width: auto; height: auto;">참가자 명단</button>
+        <div id="managerMenuBar" style="background-color: rgba(0, 0, 0, 0.7); display: flex; gap: 20px; padding: 12px 25px; border-radius: 30px; bottom: 20px; width: auto; position: absolute; left: 50%; transform: translateX(-50%); z-index: 100; align-items: center; justify-content: center;">
+            <button id="toggleAudioBtn" onclick="window.toggleAudio()" title="마이크 켜기/끄기" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;" id="audioIcon">mic</span>
+            </button>
+            <button id="toggleCameraBtn" onclick="window.toggleCamera()" title="카메라 켜기/끄기" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;" id="cameraIcon">videocam</span>
+            </button>
+            <button id="toggleScreenShare" title="화면 공유" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;">present_to_all</span>
+            </button>
+            <button id="inviteBtn" onclick="window.copyInviteLink()" title="초대하기" style="background: transparent; color: #4ade80; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;">person_add</span>
+            </button>
+            <button id="toggleChatBtn" onclick="const p = document.getElementById('chatPanel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none';" title="채팅하기" style="background: transparent; color: #60a5fa; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;">chat</span>
+            </button>
+            <button id="toggleMemberVideoBtn" onclick="window.toggleMemberVideoPanel()" title="참가자 영상 열기/닫기" style="background: transparent; color: #f472b6; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;">video_library</span>
+            </button>
+            <button id="toggleViewBtn" onclick="window.toggleViewMode()" title="타일 보기 전환" style="background: transparent; color: #fbbf24; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;" id="viewIcon">grid_view</span>
+            </button>
+            <button id="toggleMemberListPanel" title="참가자 명단" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;">group</span>
+            </button>
         </div>
     </div>
 

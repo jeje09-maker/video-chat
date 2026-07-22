@@ -726,17 +726,32 @@ class SignalingQueue {
 }
 
 // 카메라 켜기/끄기 기능
+function toggleAudio() {
+    if (window.localStream) {
+        const audioTracks = window.localStream.getAudioTracks();
+        if (audioTracks.length > 0) {
+            const track = audioTracks[0];
+            track.enabled = !track.enabled;
+            const icon = document.getElementById('audioIcon');
+            if (icon) {
+                icon.innerText = track.enabled ? 'mic' : 'mic_off';
+                icon.style.color = track.enabled ? 'white' : '#ef4444';
+            }
+        }
+    }
+}
+window.toggleAudio = toggleAudio;
+
 function toggleCamera() {
     if (window.localStream) {
         const videoTracks = window.localStream.getVideoTracks();
         if (videoTracks.length > 0) {
             const track = videoTracks[0];
-            track.enabled = !track.enabled; // 상태 반전
-
-            const btn = document.getElementById("toggleCameraBtn");
-            if (btn) {
-                // 필요 시 이미지/텍스트 변경 (현재는 텍스트로 처리)
-                btn.innerText = track.enabled ? "카메라 끄기" : "카메라 켜기";
+            track.enabled = !track.enabled;
+            const icon = document.getElementById('cameraIcon');
+            if (icon) {
+                icon.innerText = track.enabled ? 'videocam' : 'videocam_off';
+                icon.style.color = track.enabled ? 'white' : '#ef4444';
             }
         }
     }
@@ -1007,24 +1022,19 @@ window.appendChatMessage = appendChatMessage;
 // ---------------------- 뷰 모드 및 패널 토글 기능 ----------------------
 window.toggleViewMode = function() {
     const isSpeaker = document.body.classList.contains('layout-speaker');
-    const btn = document.getElementById('toggleViewBtn');
+    const icon = document.getElementById('viewIcon');
     const panel = document.getElementById('memberVideosContainer');
     
     if (isSpeaker) {
-        // 발표자 -> 타일 모드로 전환
         document.body.classList.remove('layout-speaker');
-        panel.classList.remove('show'); // 혹시 열려있던 슬라이드 패널 초기화
-        if (btn) btn.innerText = "발표자 보기";
-        
-        // 그리드 레이아웃 갱신
+        panel.classList.remove('show');
+        if (icon) icon.innerText = 'fullscreen';
         setTimeout(() => {
             if (typeof window.updateGrid === 'function') window.updateGrid();
         }, 100);
     } else {
-        // 타일 -> 발표자 모드로 전환
         document.body.classList.add('layout-speaker');
-        if (btn) btn.innerText = "타일 보기";
-        // 발표자 모드일 때는 기본적으로 참가자 영상 패널을 숨김 (필요시 직접 열게 함)
+        if (icon) icon.innerText = 'grid_view';
     }
 };
 
