@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="shortcut icon" href="#">
+    <link rel="stylesheet" href="/css/index.css">
+    
+    <!-- 구글 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    
+    <title>CODEGRASS - VIDEOCHAT</title>
+</head>
+<body>
+    <div class="theme-switch-wrapper">
+        <label class="theme-switch" for="checkbox">
+            <input type="checkbox" id="checkbox" />
+            <div class="slider round">
+                <span class="icon sun">☀️</span>
+                <span class="icon moon">🌙</span>
+            </div>
+        </label>
+    </div>
+
+    <div class="main-container">
+        <div class="glass-card">
+            <div class="logo-area">
+                <div class="pulse-ring"></div>
+                <div class="logo-icon">📸</div>
+                <h1>VideoChat</h1>
+                <p>쉽고 빠른 실시간 화상 회의</p>
+            </div>
+            
+            <div class="action-tabs">
+                <button class="tab-btn active" data-target="create">방 만들기</button>
+                <button class="tab-btn" data-target="join">코드로 참여</button>
+            </div>
+
+            <div class="tab-content active" id="create-content">
+                <button id="generate-btn" class="primary-btn">새 회의 만들기</button>
+                <div id="room-info" class="hidden">
+                    <p class="label">초대 코드</p>
+                    <div class="code-box">
+                        <span id="room-code"></span>
+                        <button id="copy-btn" class="icon-btn" title="복사하기">📋</button>
+                    </div>
+                    <p class="help-text">친구에게 코드를 공유하세요!</p>
+                    <button id="start-btn" class="success-btn">방장으로 시작하기</button>
+                </div>
+            </div>
+
+            <div class="tab-content" id="join-content">
+                <p class="label">초대 코드 입력</p>
+                <input type="text" id="join-code-input" class="modern-input" placeholder="예: a1b2c3" autocomplete="off" />
+                <button id="join-btn" class="primary-btn">참여자로 입장하기</button>
+                <p id="join-error" class="error-text hidden">코드를 입력해주세요!</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toast Notification -->
+    <div id="toast" class="toast">클립보드에 복사되었습니다!</div>
+
+    <script src="/js/index.js"></script>
+</body>
+</html>

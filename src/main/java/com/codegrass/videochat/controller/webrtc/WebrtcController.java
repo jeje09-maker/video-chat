@@ -10,6 +10,12 @@ import org.springframework.web.bind.annotation.PathVariable;
 @Controller
 public class WebrtcController {
 
+    @GetMapping("/")
+    public String index() {
+        return "index";
+    }
+
+
     @GetMapping("/videoChat/{roomId}/{type}")
     public String videoChat(@PathVariable String roomId, @PathVariable String type, Model model) {
         if("member".equals(type) || "manager".equals(type)) {

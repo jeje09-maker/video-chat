@@ -40,8 +40,7 @@ tasks.named('test') {
 }
 
 tasks.withType(JavaExec) {
-	jvmArgs "-Djavax.net.ssl.keyStore=${projectDir}/src/main/resources/keystore.p12",
-			"-Djavax.net.ssl.keyStorePassword=000000",
-			"-Djavax.net.ssl.keyStoreType=PKCS12"
+	// SSL configuration has been removed to allow local development without a keystore.
+	// In production, use a reverse proxy (like Nginx) for SSL.
 }
 

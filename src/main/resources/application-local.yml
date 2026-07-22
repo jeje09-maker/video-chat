@@ -4,9 +4,5 @@ spring:
   thymeleaf:
     cache: false
 server:
-  port: 9443
+  port: 8080
   address: 0.0.0.0
-  ssl:
-    key-store: "classpath:keystore.p12"
-    key-store-password: "000000"
-    key-store-type: PKCS12
