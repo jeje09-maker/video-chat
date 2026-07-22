@@ -725,33 +725,40 @@ class SignalingQueue {
     }
 }
 
-// 카메라 켜기/끄기 기능
+// 마이크 켜기/끄기 기능
 function toggleAudio() {
     if (window.localStream) {
         const audioTracks = window.localStream.getAudioTracks();
         if (audioTracks.length > 0) {
             const track = audioTracks[0];
             track.enabled = !track.enabled;
+            const btn  = document.getElementById('toggleAudioBtn');
             const icon = document.getElementById('audioIcon');
             if (icon) {
-                icon.innerText = track.enabled ? 'mic' : 'mic_off';
-                icon.style.color = track.enabled ? 'white' : '#ef4444';
+                icon.innerText = track.enabled ? 'mic' : 'mic';
+            }
+            if (btn) {
+                btn.classList.toggle('btn-muted', !track.enabled);
             }
         }
     }
 }
 window.toggleAudio = toggleAudio;
 
+// 카메라 켜기/끄기 기능
 function toggleCamera() {
     if (window.localStream) {
         const videoTracks = window.localStream.getVideoTracks();
         if (videoTracks.length > 0) {
             const track = videoTracks[0];
             track.enabled = !track.enabled;
+            const btn  = document.getElementById('toggleCameraBtn');
             const icon = document.getElementById('cameraIcon');
             if (icon) {
-                icon.innerText = track.enabled ? 'videocam' : 'videocam_off';
-                icon.style.color = track.enabled ? 'white' : '#ef4444';
+                icon.innerText = track.enabled ? 'videocam' : 'videocam';
+            }
+            if (btn) {
+                btn.classList.toggle('btn-muted', !track.enabled);
             }
         }
     }

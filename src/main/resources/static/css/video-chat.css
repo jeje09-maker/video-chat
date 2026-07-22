@@ -333,3 +333,40 @@ body.layout-speaker #memberVideosContainer {
 body.layout-speaker #memberVideosContainer.show {
     right: 0;
 }
+
+/* ============ 버튼 꺼짐 상태 (빨간 대각선) ============ */
+/* 마이크/카메라 버튼에 btn-muted 클래스를 붙이면 빨간 원 + 대각선 표시 */
+.btn-muted {
+    position: relative;
+}
+
+.btn-muted::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    border-radius: 50%;
+    background: rgba(239, 68, 68, 0.25); /* 연한 빨간 원 배경 */
+    pointer-events: none;
+}
+
+/* 대각선 빨간 줄 (왼쪽 위 → 오른쪽 아래) */
+.btn-muted::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 10%;
+    width: 80%;
+    height: 3px;
+    background: #ef4444;
+    transform: translateY(-50%) rotate(-45deg);
+    border-radius: 2px;
+    pointer-events: none;
+    box-shadow: 0 0 4px rgba(239,68,68,0.7);
+}
+
+/* 버튼 호버 효과 (메뉴바 아이콘) */
+#managerMenuBar button:hover {
+    opacity: 0.75;
+    transform: scale(1.15);
+    transition: transform 0.15s ease, opacity 0.15s ease;
+}
