@@ -149,6 +149,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     refresh(roomId, event, type, sessionId, jsonMessage);
                     break;
 
+                case "chat":
+                    broadcastChatMessage(roomId, event, type, sessionId, jsonMessage);
+                    break;
+
                 default:
                     log.warn("알 수 없는 이벤트 = {}", event);
                     break;
@@ -206,6 +210,24 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String recipientSessionId = jsonMessage.get("recipientSessionId").getAsString();
 
         sendRefreshMessageToUser(roomId, event, type, sessionId, recipientSessionId);
+    }
+
+    // chat 핸들러
+    private void broadcastChatMessage(String roomId, String event, String type, String sessionId, JsonObject jsonMessage) {
+        String messageText = jsonMessage.get("message").getAsString();
+
+        JsonObject sendJsonMessage = new JsonObject();
+        sendJsonMessage.addProperty("event", event);
+        sendJsonMessage.addProperty("type", type);
+        sendJsonMessage.addProperty("sessionId", sessionId);
+        sendJsonMessage.addProperty("message", messageText);
+        String sendMessageContent = new Gson().toJson(sendJsonMessage);
+
+        for (WebSocketSession webSocketSession : rooms.get(roomId).values()) {
+            if (!webSocketSession.getId().equals(sessionId)) {
+                sendSafeMessage(webSocketSession, sendMessageContent);
+            }
+        }
     }
 
     // 특정 사용자에게 메시지 전송 (offer, answer, ice-candidate)

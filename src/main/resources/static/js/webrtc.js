@@ -120,6 +120,12 @@ socket.onmessage = async (event) => {
                 await handleRefresh(message.sessionId);
                 break;
 
+            case 'chat':
+                if (typeof window.receiveChatMessage === 'function') {
+                    window.receiveChatMessage(message.sessionId, message.message);
+                }
+                break;
+
             default:
                 console.log('알 수 없는 메시지 이벤트:', event);
                 break;
@@ -183,9 +189,13 @@ async function getMediaStream() {
         }
 
         // 비디오 + 오디오 트랙을 하나의 스트림으로 합치기
-        const combinedStream = new MediaStream();
+        let combinedStream = new MediaStream();
         videoStream.getTracks().forEach(track => combinedStream.addTrack(track));
         audioStream.getTracks().forEach(track => combinedStream.addTrack(track));
+
+        if (typeof window.processVirtualBackground === 'function') {
+            combinedStream = await window.processVirtualBackground(combinedStream);
+        }
 
         return combinedStream;
 
@@ -745,3 +755,57 @@ function copyInviteLink() {
     });
 }
 window.copyInviteLink = copyInviteLink;
+
+// ---------------------- 채팅 기능 ----------------------
+function sendChatMessage() {
+    const input = document.getElementById('chatInput');
+    const msg = input.value.trim();
+    if (!msg) return;
+
+    // 화면에 내 메시지 표시
+    appendChatMessage("나", msg, true);
+    input.value = '';
+
+    // 서버로 전송
+    if (socket.readyState === WebSocket.OPEN) {
+        socket.send(JSON.stringify({
+            event: 'chat',
+            sessionId: mySessionId || "나",
+            message: msg
+        }));
+    }
+}
+window.sendChatMessage = sendChatMessage;
+
+function receiveChatMessage(senderId, msg) {
+    appendChatMessage(senderId, msg, false);
+}
+window.receiveChatMessage = receiveChatMessage;
+
+function appendChatMessage(sender, msg, isMe) {
+    const container = document.getElementById('chatMessages');
+    if (!container) return;
+
+    const div = document.createElement('div');
+    div.style.maxWidth = "80%";
+    div.style.padding = "8px 12px";
+    div.style.borderRadius = "8px";
+    div.style.marginBottom = "5px";
+    div.style.wordBreak = "break-word";
+    
+    if (isMe) {
+        div.style.alignSelf = "flex-end";
+        div.style.backgroundColor = "#007bff";
+        div.style.color = "white";
+        div.innerHTML = `<span>${msg}</span>`;
+    } else {
+        div.style.alignSelf = "flex-start";
+        div.style.backgroundColor = "#e9ecef";
+        div.style.color = "black";
+        div.innerHTML = `<span style="font-size: 0.8em; color: #555; margin-bottom: 3px; display: block; font-weight: bold;">${sender}</span><span>${msg}</span>`;
+    }
+    
+    container.appendChild(div);
+    container.scrollTop = container.scrollHeight;
+}
+window.appendChatMessage = appendChatMessage;
