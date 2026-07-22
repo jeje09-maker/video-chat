@@ -30,20 +30,26 @@ function sendHeartbeat() {
 
 // 카메라 및 마이크 권한 변경을 감지하여 상태가 바뀌면 페이지를 새로고침하는 함수
 async function checkPermissionChanges() {
-    let lastCameraState = (await navigator.permissions.query({name: "camera"})).state;
-    let lastMicState = (await navigator.permissions.query({name: "microphone"})).state;
+    try {
+        let lastCameraState = (await navigator.permissions.query({name: "camera"})).state;
+        let lastMicState = (await navigator.permissions.query({name: "microphone"})).state;
 
-    setInterval(async () => {
-        const cameraState = (await navigator.permissions.query({name: "camera"})).state;
-        const micState = (await navigator.permissions.query({name: "microphone"})).state;
+        setInterval(async () => {
+            try {
+                const cameraState = (await navigator.permissions.query({name: "camera"})).state;
+                const micState = (await navigator.permissions.query({name: "microphone"})).state;
 
-        if (cameraState !== lastCameraState || micState !== lastMicState) {
-            location.reload();
-        }
+                if (cameraState !== lastCameraState || micState !== lastMicState) {
+                    location.reload();
+                }
 
-        lastCameraState = cameraState;
-        lastMicState = micState;
-    }, 1000); // 1초마다 체크
+                lastCameraState = cameraState;
+                lastMicState = micState;
+            } catch (e) {}
+        }, 1000); // 1초마다 체크
+    } catch (e) {
+        console.warn("권한 변경 감지 기능이 이 브라우저에서 지원되지 않습니다.");
+    }
 }
 
 checkPermissionChanges().then(() => {
@@ -191,18 +197,26 @@ async function getMediaStream() {
 
 // 카메라 허용 여부 판단 ("granted" = 허용됨, "denied" = 차단됨, "prompt" = 요청 전)
 async function checkCamPermissions() {
-    const camPermission = await navigator.permissions.query({name: "camera"});
-    return {
-        camera: camPermission.state
-    };
+    try {
+        const camPermission = await navigator.permissions.query({name: "camera"});
+        return {
+            camera: camPermission.state
+        };
+    } catch (e) {
+        return { camera: "prompt" }; // 지원하지 않는 브라우저 대응
+    }
 }
 
 // 마이크 허용 여부 판단 ("granted" = 허용됨, "denied" = 차단됨, "prompt" = 요청 전)
 async function checkMicPermissions() {
-    const micPermission = await navigator.permissions.query({name: "microphone"});
-    return {
-        microphone: micPermission.state,
-    };
+    try {
+        const micPermission = await navigator.permissions.query({name: "microphone"});
+        return {
+            microphone: micPermission.state,
+        };
+    } catch (e) {
+        return { microphone: "prompt" }; // 지원하지 않는 브라우저 대응
+    }
 }
 
 // 검은 화면을 위한 비디오 트랙 생성
@@ -251,6 +265,11 @@ function addMemberVideo(sessionId, stream) {
         const emptyVideoSlot = emptyWrapper.querySelector("video");
         emptyVideoSlot.srcObject = stream;
         emptyVideoSlot.id = sessionId;
+        
+        // 내(로컬) 스트림일 경우 하울링 방지 및 브라우저 자동 재생 정책을 위해 음소거
+        if (stream === window.localStream) {
+            emptyVideoSlot.muted = true;
+        }
 
         // 항상 새로운 `label`을 생성하여 추가
         const label = document.createElement("span");
