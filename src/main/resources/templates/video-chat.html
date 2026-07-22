@@ -26,25 +26,7 @@
         <!-- 화면 공유 시 내 얼굴을 띄워줄 작은 비디오 요소 -->
         <video id="localCameraVideo" autoplay muted></video>
 
-        <!-- 배경 선택기 추가 -->
-        <div id="bgSelector" style="position: absolute; bottom: 80px; left: 10px; z-index: 100; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 30px; display: flex; gap: 10px; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
-            <span style="color: white; font-size: 12px; margin-right: 5px; font-weight: bold;">배경:</span>
-            <button onclick="window.setVirtualBackground('none')" title="원본" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
-                <span class="material-symbols-outlined" style="font-size: 24px;">person</span>
-            </button>
-            <button onclick="window.setVirtualBackground('blur')" title="배경흐림" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
-                <span class="material-symbols-outlined" style="font-size: 24px;">blur_on</span>
-            </button>
-            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=60')" title="해변" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
-                <span class="material-symbols-outlined" style="font-size: 24px;">beach_access</span>
-            </button>
-            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=500&q=60')" title="사무실" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
-                <span class="material-symbols-outlined" style="font-size: 24px;">desk</span>
-            </button>
-            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=500&q=60')" title="산" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
-                <span class="material-symbols-outlined" style="font-size: 24px;">landscape</span>
-            </button>
-        </div>
+
 
         <!-- 메뉴바 추가 -->
         <div id="managerMenuBar" style="background-color: rgba(0, 0, 0, 0.7); display: flex; gap: 20px; padding: 12px 25px; border-radius: 30px; bottom: 20px; width: auto; position: absolute; left: 50%; transform: translateX(-50%); z-index: 100; align-items: center; justify-content: center;">
@@ -65,6 +47,9 @@
             </button>
             <button id="toggleMemberVideoBtn" onclick="window.toggleMemberVideoPanel()" title="참가자 영상 열기/닫기" style="background: transparent; color: #f472b6; border: none; cursor: pointer; transition: 0.2s;">
                 <span class="material-symbols-outlined" style="font-size: 28px;">video_library</span>
+            </button>
+            <button id="toggleBgBtn" onclick="document.getElementById('bgModal').style.display = document.getElementById('bgModal').style.display === 'none' ? 'block' : 'none';" title="배경" style="background: transparent; color: #a855f7; border: none; cursor: pointer; transition: 0.2s;">
+                <span class="material-symbols-outlined" style="font-size: 28px;">landscape</span>
             </button>
             <button id="toggleViewBtn" onclick="window.toggleViewMode()" title="타일 보기 전환" style="background: transparent; color: #fbbf24; border: none; cursor: pointer; transition: 0.2s;">
                 <span class="material-symbols-outlined" style="font-size: 28px;" id="viewIcon">grid_view</span>
@@ -124,5 +109,91 @@
 <script type="module" src="/js/video-grid.js" defer></script>
 <script type="module" src="/js/screen-share.js" defer></script>
 <script src="/js/virtual-background.js" defer></script>
+<!-- 배경 선택 모달 -->
+<div id="bgModal" style="display: none; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px; z-index: 101; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
+    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;">
+        <h3 style="color: white; margin: 0; font-size: 16px;">배경 선택</h3>
+        <button onclick="document.getElementById('bgModal').style.display='none'" style="background: none; border: none; color: white; cursor: pointer; font-size: 16px; font-weight: bold;">X</button>
+    </div>
+    <div id="bgGrid" style="display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; max-height: 300px; overflow-y: auto; padding-right: 5px;">
+        <!-- JS에서 배경 목록을 주입 -->
+    </div>
+</div>
+
+<script>
+    const bgList = [
+        { name: '원본', type: 'none' },
+        { name: '배경흐림', type: 'blur' },
+        { name: '카페', type: 'url', url: 'https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=300&q=80' },
+        { name: '산', type: 'url', url: 'https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=300&q=80' },
+        { name: '해변', type: 'url', url: 'https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=300&q=80' },
+        { name: '밤하늘', type: 'url', url: 'https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=300&q=80' },
+        { name: '사막', type: 'url', url: 'https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=300&q=80' },
+        { name: '숲', type: 'url', url: 'https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=300&q=80' },
+        { name: '도서관', type: 'url', url: 'https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=300&q=80' },
+        { name: '강변', type: 'url', url: 'https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=300&q=80' },
+        { name: '스카이라운지', type: 'url', url: 'https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=300&q=80' },
+        { name: '산토리니', type: 'url', url: 'https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=300&q=80' },
+        { name: '우주', type: 'url', url: 'https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=300&q=80' },
+        { name: '도시야경', type: 'url', url: 'https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=300&q=80' },
+        { name: '바다밑', type: 'url', url: 'https://images.unsplash.com/photo-1682687982501-1e58b814714c?auto=format&fit=crop&w=300&q=80' },
+        { name: '설원', type: 'url', url: 'https://images.unsplash.com/photo-1478265409131-1f65c88f965c?auto=format&fit=crop&w=300&q=80' },
+        { name: '사무실', type: 'url', url: 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=300&q=80' },
+        { name: '꽃밭', type: 'url', url: 'https://images.unsplash.com/photo-1490750967868-88cb147861a3?auto=format&fit=crop&w=300&q=80' },
+        { name: '가을단풍', type: 'url', url: 'https://images.unsplash.com/photo-1507371341162-763b5e419408?auto=format&fit=crop&w=300&q=80' },
+        { name: '눈내리는마을', type: 'url', url: 'https://images.unsplash.com/photo-1517260739337-6799d239ce83?auto=format&fit=crop&w=300&q=80' }
+    ];
+
+    const bgGrid = document.getElementById('bgGrid');
+    if (bgGrid) {
+        bgList.forEach(bg => {
+            const btn = document.createElement('button');
+            btn.style.width = '100%';
+            btn.style.height = '60px';
+            btn.style.border = '2px solid transparent';
+            btn.style.borderRadius = '8px';
+            btn.style.cursor = 'pointer';
+            btn.style.overflow = 'hidden';
+            btn.style.position = 'relative';
+            btn.style.padding = '0';
+            btn.style.backgroundColor = '#333';
+            btn.title = bg.name;
+            
+            btn.onmouseover = () => btn.style.border = '2px solid #007bff';
+            btn.onmouseout = () => btn.style.border = '2px solid transparent';
+
+            if (bg.type === 'none') {
+                btn.innerHTML = '<span class="material-symbols-outlined" style="color:white; font-size: 30px; display: block; margin-top: 15px;">person</span>';
+            } else if (bg.type === 'blur') {
+                btn.innerHTML = '<span class="material-symbols-outlined" style="color:white; font-size: 30px; display: block; margin-top: 15px;">blur_on</span>';
+            } else {
+                btn.style.backgroundImage = `url(${bg.url})`;
+                btn.style.backgroundSize = 'cover';
+                btn.style.backgroundPosition = 'center';
+            }
+
+            const label = document.createElement('span');
+            label.innerText = bg.name;
+            label.style.position = 'absolute';
+            label.style.bottom = '0';
+            label.style.left = '0';
+            label.style.width = '100%';
+            label.style.background = 'rgba(0,0,0,0.6)';
+            label.style.color = 'white';
+            label.style.fontSize = '10px';
+            label.style.padding = '2px 0';
+            label.style.textAlign = 'center';
+            
+            btn.appendChild(label);
+            
+            btn.onclick = () => {
+                const val = bg.type === 'url' ? bg.url.replace('w=300', 'w=1280') : bg.type;
+                if(typeof window.setVirtualBackground === 'function') window.setVirtualBackground(val);
+                document.getElementById('bgModal').style.display = 'none';
+            };
+            bgGrid.appendChild(btn);
+        });
+    }
+</script>
 </body>
 </html>

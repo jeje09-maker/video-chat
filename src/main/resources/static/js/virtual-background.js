@@ -77,6 +77,7 @@ window.processVirtualBackground = async function(stream) {
         videoElement = document.createElement('video');
         videoElement.autoplay = true;
         videoElement.playsInline = true;
+        videoElement.muted = true; // 브라우저 자동 재생 정책을 위해 반드시 필요
         
         canvasElement = document.createElement('canvas');
         canvasCtx = canvasElement.getContext('2d');
