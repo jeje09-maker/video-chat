@@ -27,12 +27,23 @@
         <video id="localCameraVideo" autoplay muted></video>
 
         <!-- 배경 선택기 추가 -->
-        <div id="bgSelector" style="position: absolute; bottom: 80px; left: 10px; z-index: 100; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 5px; display: flex; gap: 10px;">
-            <button onclick="window.setVirtualBackground('none')">원본</button>
-            <button onclick="window.setVirtualBackground('blur')">배경흐림</button>
-            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=60')">해변</button>
-            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=500&q=60')">사무실</button>
-            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=500&q=60')">산</button>
+        <div id="bgSelector" style="position: absolute; bottom: 80px; left: 10px; z-index: 100; background: rgba(0,0,0,0.7); padding: 10px; border-radius: 30px; display: flex; gap: 10px; align-items: center; box-shadow: 0 4px 6px rgba(0,0,0,0.3);">
+            <span style="color: white; font-size: 12px; margin-right: 5px; font-weight: bold;">배경:</span>
+            <button onclick="window.setVirtualBackground('none')" title="원본" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
+                <span class="material-symbols-outlined" style="font-size: 24px;">person</span>
+            </button>
+            <button onclick="window.setVirtualBackground('blur')" title="배경흐림" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
+                <span class="material-symbols-outlined" style="font-size: 24px;">blur_on</span>
+            </button>
+            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=500&q=60')" title="해변" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
+                <span class="material-symbols-outlined" style="font-size: 24px;">beach_access</span>
+            </button>
+            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=500&q=60')" title="사무실" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
+                <span class="material-symbols-outlined" style="font-size: 24px;">desk</span>
+            </button>
+            <button onclick="window.setVirtualBackground('https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=500&q=60')" title="산" style="background: transparent; color: white; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; padding: 5px;">
+                <span class="material-symbols-outlined" style="font-size: 24px;">landscape</span>
+            </button>
         </div>
 
         <!-- 메뉴바 추가 -->

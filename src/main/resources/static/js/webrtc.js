@@ -75,10 +75,10 @@ socket.onmessage = async (event) => {
                     console.error("미디어 스트림 설정 실패:", error);
                 }
 
-                // 관리자 화면 생성
-                if (myType === 'manager') addManagerVideo(window.localStream);
+                // 관리자 화면 생성 (managerVideo 엘리먼트가 있으면 방장 화면 띄움)
+                if (document.getElementById('managerVideo')) addManagerVideo(window.localStream);
 
-                // 멤버 화면 생성
+                // 멤버 화면 생성 (멤버일 경우 멤버 패널에도 띄움)
                 if (myType === 'member') addMemberVideo(message.sessionId, window.localStream);
             }
         }
