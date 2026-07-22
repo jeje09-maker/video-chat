@@ -732,3 +732,16 @@ function toggleCamera() {
     }
 }
 window.toggleCamera = toggleCamera;
+
+// 초대 링크 복사 기능
+function copyInviteLink() {
+    const rId = window.location.pathname.split("/")[2];
+    const inviteUrl = window.location.origin + "/videoChat/" + rId + "/member";
+    navigator.clipboard.writeText(inviteUrl).then(() => {
+        alert("채팅방 초대 링크가 복사되었습니다!\n원하는 곳에 붙여넣기(Ctrl+V) 하여 사람들을 초대하세요.\n" + inviteUrl);
+    }).catch(err => {
+        console.error("초대 링크 복사 실패", err);
+        alert("초대 링크 복사에 실패했습니다. 브라우저 권한을 확인해주세요.");
+    });
+}
+window.copyInviteLink = copyInviteLink;
