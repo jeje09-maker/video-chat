@@ -512,22 +512,21 @@ async function createPeerConnection(sessionId, type, event) {
         if (!addedStreams.has(event.streams[0].id)) {
             addedStreams.add(event.streams[0].id);
 
-            // 관리자 화면 생성
+            const stream = event.streams[0];
+            
+            // 모든 사람(방장 포함)을 썸네일에 추가
+            addMemberVideo(sessionId, stream);
+
+            // 관리자 화면 수신 시 (내가 멤버일 때)
             if (type === 'manager') {
-                const managerVideo = document.getElementById("managerVideo");
-                const stream = event.streams[0];
-                managerVideo.srcObject = stream;
+                // 관리자 영상을 메인 화면으로 설정
+                selectMainVideo(sessionId, stream);
 
                 // 오디오 태그를 따로 생성해서 관리자 소리 재생
                 const audioElement = new Audio();
                 audioElement.srcObject = stream;
                 audioElement.autoplay = true;
                 audioElement.play();
-            }
-
-            // 멤버 화면 생성
-            if (type === 'member') {
-                addMemberVideo(sessionId, event.streams[0]);
             }
 
         } else {
