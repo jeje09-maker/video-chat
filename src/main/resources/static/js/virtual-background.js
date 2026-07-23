@@ -77,7 +77,7 @@ function onResults(results) {
     if (bgType === 'blur') {
         canvasCtx.filter = 'blur(20px)';
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
-    } else if (bgImage && bgImage.complete) {
+    } else if (bgImage && bgImage.complete && bgImage.naturalWidth !== 0) {
         canvasCtx.filter = 'none';
         canvasCtx.drawImage(bgImage, 0, 0, canvasElement.width, canvasElement.height);
     } else {
