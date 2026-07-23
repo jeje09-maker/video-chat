@@ -94,23 +94,6 @@ socket.onmessage = async (event) => {
 
                 // 멤버 화면 생성 (멤버일 경우 멤버 패널에도 띄움)
                 if (myType === 'member') addMemberVideo(message.sessionId, window.localStream);
-
-                // === 방장 본인도 참가자 목록에 추가 ===
-                if (myType === 'manager') {
-                    if (!window.members.includes('나 (방장)')) {
-                        window.members.push('나 (방장)');
-                        window.userNames['나 (방장)'] = window.myUserName + " (나)";
-                    }
-                    // updateMemberList는 member-panel.js가 로드된 뒤 호출 (DOMContentLoaded 후)
-                    const tryUpdate = () => {
-                        if (typeof window.updateMemberList === 'function') {
-                            window.updateMemberList();
-                        } else {
-                            setTimeout(tryUpdate, 100);
-                        }
-                    };
-                    tryUpdate();
-                }
             }
         }
 
@@ -549,7 +532,11 @@ async function handleJoinMember(sessionId) {
         mySessionId = sessionId;
         
         // 내 로컬 레이블 및 이름 설정
-        window.userNames[mySessionId] = window.myUserName;
+        if (myType === 'manager') {
+            window.userNames[mySessionId] = window.myUserName + " (방장)";
+        } else {
+            window.userNames[mySessionId] = window.myUserName;
+        }
         if (myType === 'manager') {
             const managerVideoContainer = document.querySelector('.manager-video-container');
             if (managerVideoContainer && !document.getElementById("label-" + mySessionId)) {

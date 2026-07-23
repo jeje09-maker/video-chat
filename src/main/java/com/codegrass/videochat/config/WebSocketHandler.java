@@ -360,6 +360,11 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     // WebSocketSession 에서 sessionId를 추출하는 메서드
     private String getSessionIdFromSession(WebSocketSession session) {
+        if (session.getAttributes().containsKey("sessionId")) {
+            return (String) session.getAttributes().get("sessionId");
+        }
+
+        String sessionId = session.getId();
         URI uri = session.getUri();
         if (uri != null && uri.getQuery() != null) {
             try {
@@ -367,9 +372,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 for (String param : params) {
                     if (param.startsWith("name=")) {
                         String name = param.substring(5);
-                        name = java.net.URLDecoder.decode(name, "UTF-8");
-                        if (!name.trim().isEmpty()) {
-                            return name.trim() + "_" + session.getId().substring(0, 4);
+                        name = java.net.URLDecoder.decode(name, "UTF-8").trim();
+                        if (!name.isEmpty()) {
+                            sessionId = name;
+                            break;
                         }
                     }
                 }
@@ -377,7 +383,19 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 log.error("Failed to parse name from query", e);
             }
         }
-        return session.getId();
+
+        String roomId = getRoomIdFromSession(session);
+        if (roomId != null && rooms.containsKey(roomId)) {
+            String baseName = sessionId;
+            int count = 1;
+            while (rooms.get(roomId).containsKey(sessionId)) {
+                sessionId = baseName + "_" + count;
+                count++;
+            }
+        }
+        
+        session.getAttributes().put("sessionId", sessionId);
+        return sessionId;
     }
 
     // URI에서 type (member 또는 manager)을 추출하는 메소드
