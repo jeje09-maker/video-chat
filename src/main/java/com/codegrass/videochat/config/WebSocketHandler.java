@@ -96,7 +96,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 log.info("[left-member] 멤버가 퇴장하였습니다. roomId = [{}]", roomId);
             }
 
-            rooms.get(roomId).remove(session.getId());
+            rooms.get(roomId).remove(sessionId);
             broadcastToRoomExceptSender(roomId, "left-member", type, sessionId);
 
         } catch (Exception e) {
@@ -149,6 +149,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                     refresh(roomId, event, type, sessionId, jsonMessage);
                     break;
 
+                case "change-name":
+                    broadcastChangeName(roomId, event, type, sessionId, jsonMessage);
+                    break;
+
                 case "chat":
                     broadcastChatMessage(roomId, event, type, sessionId, jsonMessage);
                     break;
@@ -169,7 +173,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String offerSdp = jsonMessage.get("sdp").getAsString();
         JsonObject offerJson = JsonParser.parseString(offerSdp).getAsJsonObject();
 
-        sendToUser(roomId, event, type, sessionId, recipientSessionId, offerJson.toString());
+        sendToUser(roomId, event, type, sessionId, recipientSessionId, offerJson.toString(), jsonMessage);
     }
 
     // answer 핸들러
@@ -178,7 +182,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String answerSdp = jsonMessage.get("sdp").getAsString();
         JsonObject answerJson = JsonParser.parseString(answerSdp).getAsJsonObject();
 
-        sendToUser(roomId, event, type, sessionId, recipientSessionId, answerJson.toString());
+        sendToUser(roomId, event, type, sessionId, recipientSessionId, answerJson.toString(), jsonMessage);
     }
 
     // ice-candidate 핸들러
@@ -187,7 +191,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String candidateString = jsonMessage.get("candidate").getAsString();
         JsonObject candidateJson = JsonParser.parseString(candidateString).getAsJsonObject();
 
-        sendToUser(roomId, event, type, sessionId, recipientSessionId, candidateJson.toString());
+        sendToUser(roomId, event, type, sessionId, recipientSessionId, candidateJson.toString(), jsonMessage);
     }
 
     // microphone 핸들러
@@ -221,22 +225,46 @@ public class WebSocketHandler extends TextWebSocketHandler {
         sendJsonMessage.addProperty("type", type);
         sendJsonMessage.addProperty("sessionId", sessionId);
         sendJsonMessage.addProperty("message", messageText);
+        if (jsonMessage.has("userName")) {
+            sendJsonMessage.addProperty("userName", jsonMessage.get("userName").getAsString());
+        }
         String sendMessageContent = new Gson().toJson(sendJsonMessage);
 
         for (WebSocketSession webSocketSession : rooms.get(roomId).values()) {
-            if (!webSocketSession.getId().equals(sessionId)) {
+            if (!getSessionIdFromSession(webSocketSession).equals(sessionId)) {
+                sendSafeMessage(webSocketSession, sendMessageContent);
+            }
+        }
+    }
+
+    // change-name 핸들러
+    private void broadcastChangeName(String roomId, String event, String type, String sessionId, JsonObject jsonMessage) {
+        String userName = jsonMessage.get("userName").getAsString();
+
+        JsonObject sendJsonMessage = new JsonObject();
+        sendJsonMessage.addProperty("event", event);
+        sendJsonMessage.addProperty("type", type);
+        sendJsonMessage.addProperty("sessionId", sessionId);
+        sendJsonMessage.addProperty("userName", userName);
+        String sendMessageContent = new Gson().toJson(sendJsonMessage);
+
+        for (WebSocketSession webSocketSession : rooms.get(roomId).values()) {
+            if (!getSessionIdFromSession(webSocketSession).equals(sessionId)) {
                 sendSafeMessage(webSocketSession, sendMessageContent);
             }
         }
     }
 
     // 특정 사용자에게 메시지 전송 (offer, answer, ice-candidate)
-    private void sendToUser(String roomId, String event, String type, String sessionId, String recipientSessionId, String data) {
+    private void sendToUser(String roomId, String event, String type, String sessionId, String recipientSessionId, String data, JsonObject originalJson) {
         JsonObject sendJsonMessage = new JsonObject();
         sendJsonMessage.addProperty("event", event);
         sendJsonMessage.addProperty("type", type);
         sendJsonMessage.addProperty("sessionId", sessionId);
         sendJsonMessage.addProperty(event.equals("ice-candidate") ? "candidate" : "sdp", data);
+        if (originalJson != null && originalJson.has("userName")) {
+            sendJsonMessage.addProperty("userName", originalJson.get("userName").getAsString());
+        }
         String sendMessageContent = new Gson().toJson(sendJsonMessage);
 
         WebSocketSession recipientSession = rooms.get(roomId).get(recipientSessionId);
@@ -297,7 +325,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
         String sendMessageContent = new Gson().toJson(sendJsonMessage);
 
         for (WebSocketSession webSocketSession : rooms.get(roomId).values()) {
-            if (!webSocketSession.getId().equals(sessionId)) { // 자기 자신에게는 보내지 않음
+            if (!getSessionIdFromSession(webSocketSession).equals(sessionId)) { // 자기 자신에게는 보내지 않음
                 sendSafeMessage(webSocketSession, sendMessageContent); // 안전한 전송 메서드 사용
             }
         }
@@ -332,6 +360,23 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
     // WebSocketSession 에서 sessionId를 추출하는 메서드
     private String getSessionIdFromSession(WebSocketSession session) {
+        URI uri = session.getUri();
+        if (uri != null && uri.getQuery() != null) {
+            try {
+                String[] params = uri.getQuery().split("&");
+                for (String param : params) {
+                    if (param.startsWith("name=")) {
+                        String name = param.substring(5);
+                        name = java.net.URLDecoder.decode(name, java.nio.charset.StandardCharsets.UTF_8);
+                        if (!name.trim().isEmpty()) {
+                            return name.trim() + "_" + session.getId().substring(0, 4);
+                        }
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to parse name from query", e);
+            }
+        }
         return session.getId();
     }
 

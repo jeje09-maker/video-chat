@@ -47,15 +47,20 @@
                         <button id="copy-btn" class="icon-btn" title="복사하기">📋</button>
                     </div>
                     <p class="help-text">친구에게 코드를 공유하세요!</p>
+                    <p class="label">이름 입력</p>
+                    <input type="text" id="create-name-input" class="modern-input" placeholder="이름을 입력하세요" autocomplete="off" style="margin-bottom: 10px;" />
                     <button id="start-btn" class="success-btn">방장으로 시작하기</button>
+                    <p id="create-error" class="error-text hidden">이름을 입력해주세요!</p>
                 </div>
             </div>
 
             <div class="tab-content" id="join-content">
                 <p class="label">초대 코드 입력</p>
-                <input type="text" id="join-code-input" class="modern-input" placeholder="예: a1b2c3" autocomplete="off" />
+                <input type="text" id="join-code-input" class="modern-input" placeholder="예: a1b2c3" autocomplete="off" style="margin-bottom: 10px;" />
+                <p class="label">이름 입력</p>
+                <input type="text" id="join-name-input" class="modern-input" placeholder="이름을 입력하세요" autocomplete="off" />
                 <button id="join-btn" class="primary-btn">참여자로 입장하기</button>
-                <p id="join-error" class="error-text hidden">코드를 입력해주세요!</p>
+                <p id="join-error" class="error-text hidden">코드와 이름을 입력해주세요!</p>
             </div>
         </div>
     </div>

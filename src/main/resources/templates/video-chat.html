@@ -4,7 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="shortcut icon" href="#">
-    <link rel="stylesheet" href="/css/video-chat.css?v=20260723_7">
+    <link rel="stylesheet" href="/css/video-chat.css?v=20260723_9">
 
     <!-- 구글 폰트 & 아이콘 -->
     <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -18,6 +18,36 @@
     <title>CODEGRASS - VIDEOCHAT</title>
 </head>
 <body class="layout-speaker">
+
+<!-- 이름 입력 모달 -->
+<div id="namePromptOverlay" style="display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.8); z-index: 9999; flex-direction: column; align-items: center; justify-content: center;">
+    <div style="background: white; padding: 40px; border-radius: 12px; text-align: center; box-shadow: 0 4px 15px rgba(0,0,0,0.3); width: 90%; max-width: 400px;">
+        <h2 style="margin-top: 0; margin-bottom: 20px; color: #333;">참가자 이름 입력</h2>
+        <input type="text" id="joinNameInput" placeholder="이름을 입력하세요" style="padding: 12px; font-size: 16px; width: 100%; box-sizing: border-box; margin-bottom: 20px; border: 1px solid #ccc; border-radius: 8px;" onkeypress="if(event.key==='Enter') submitName()">
+        <button onclick="submitName()" style="padding: 12px 20px; font-size: 16px; width: 100%; background: #007bff; color: white; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; transition: background 0.3s;" onmouseover="this.style.background='#0056b3'" onmouseout="this.style.background='#007bff'">입장하기</button>
+    </div>
+</div>
+
+<script>
+    const pathname_check = window.location.pathname;
+    const role_check = pathname_check.split('/').pop();
+    const urlParams_check = new URLSearchParams(window.location.search);
+    
+    if (!urlParams_check.has('name')) {
+        document.getElementById('namePromptOverlay').style.display = 'flex';
+        document.write('<style>#videoContainer { display: none !important; }</style>');
+        window.blockWebRTC = true;
+    }
+
+    function submitName() {
+        const name = document.getElementById('joinNameInput').value.trim();
+        if (name) {
+            window.location.href = window.location.pathname + "?name=" + encodeURIComponent(name);
+        } else {
+            alert("이름을 입력해주세요.");
+        }
+    }
+</script>
 
 <div id="videoContainer">
     <!-- 매니저 비디오 (왼쪽 절반) -->
@@ -73,7 +103,7 @@
     </div>
 
     <!-- 채팅 패널 추가 -->
-    <div id="chatPanel" style="display: none; position: absolute; right: 0; top: 0; width: 320px; height: 100%; background: rgba(0, 0, 0, 0.7); backdrop-filter: blur(10px); z-index: 100; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.2); box-shadow: -4px 0 15px rgba(0,0,0,0.5);">
+    <div id="chatPanel" style="display: none; position: absolute; right: 0; top: 0; width: 320px; height: 100%; background: rgba(0, 0, 0, 0.4); backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); z-index: 100; flex-direction: column; border-left: 1px solid rgba(255,255,255,0.2); box-shadow: -4px 0 15px rgba(0,0,0,0.5);">
         <div style="padding: 15px; background: rgba(255, 255, 255, 0.1); color: white; display: flex; justify-content: space-between; align-items: center; font-weight: bold; border-bottom: 1px solid rgba(255,255,255,0.2);">
             <span style="font-size: 16px;">채팅</span>
             <button onclick="document.getElementById('chatPanel').style.display='none'" style="background:none; border:none; color:white; cursor:pointer; font-weight:bold; font-size: 16px; transition: opacity 0.2s;" onmouseover="this.style.opacity='0.7'" onmouseout="this.style.opacity='1'">X</button>
@@ -104,11 +134,11 @@
         document.getElementById('toggleScreenShare').style.display = 'none';
     }
 </script>
-<script src='/js/webrtc.js?v=20260723_8'></script>
-<script type="module" src="/js/member-panel.js?v=20260723_8" defer></script>
-<script type="module" src="/js/video-grid.js?v=20260723_8" defer></script>
-<script type="module" src="/js/screen-share.js?v=20260723_8" defer></script>
-<script src="/js/virtual-background.js?v=20260723_8" defer></script>
+<script src='/js/webrtc.js?v=20260723_9'></script>
+<script type="module" src="/js/member-panel.js?v=20260723_9" defer></script>
+<script type="module" src="/js/video-grid.js?v=20260723_9" defer></script>
+<script type="module" src="/js/screen-share.js?v=20260723_9" defer></script>
+<script src="/js/virtual-background.js?v=20260723_9" defer></script>
 <!-- 배경 선택 모달 -->
 <div id="bgModal" style="display: none; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px; z-index: 101; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;">

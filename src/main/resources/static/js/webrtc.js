@@ -1,6 +1,17 @@
+if (window.blockWebRTC) {
+    throw new Error("WebRTC initialization blocked until name is provided.");
+}
+
 const path = window.location.pathname;
 const roomId = path.split('/')[2];  // 방번호
 const myType = path.split('/')[3];  // 회원 or 관리자
+
+const urlParams = new URLSearchParams(window.location.search);
+const userName = urlParams.get('name') || '';
+
+// 이름 매핑을 저장하는 전역 객체
+window.userNames = {};
+window.myUserName = userName;
 
 let mySessionId = '';
 let peerConnections = {};  // 각 방의 PeerConnection 관리
@@ -12,7 +23,8 @@ window.localStream = null;
 window.members = window.members || [];
 
 // WebSocket 연결
-const socket = new WebSocket(`wss://${location.host}/ws/${roomId}/${myType}`);
+const socketNameParam = userName ? `?name=${encodeURIComponent(userName)}` : '';
+const socket = new WebSocket(`wss://${location.host}/ws/${roomId}/${myType}${socketNameParam}`);
 
 socket.onopen = () => {
     console.log('WebSocket 연결 성공');
@@ -84,10 +96,10 @@ socket.onmessage = async (event) => {
                 if (myType === 'member') addMemberVideo(message.sessionId, window.localStream);
 
                 // === 방장 본인도 참가자 목록에 추가 ===
-                // window.members는 이 파일 상단에서 미리 초기화되어 있음
                 if (myType === 'manager') {
                     if (!window.members.includes('나 (방장)')) {
                         window.members.push('나 (방장)');
+                        window.userNames['나 (방장)'] = window.myUserName + " (나)";
                     }
                     // updateMemberList는 member-panel.js가 로드된 뒤 호출 (DOMContentLoaded 후)
                     const tryUpdate = () => {
@@ -104,18 +116,22 @@ socket.onmessage = async (event) => {
 
         switch (message.event) {
             case 'first-join':
+                if (message.userName) window.userNames[message.sessionId] = message.userName;
                 await handleJoinMember(message.sessionId);
                 break;
 
             case 'join-member':
+                if (message.userName) window.userNames[message.sessionId] = message.userName;
                 await createPeerConnection(message.sessionId, message.type, message.event);
                 break;
 
             case 'offer':
+                if (message.userName) window.userNames[message.sessionId] = message.userName;
                 await handleOffer(message.sessionId, message.sdp, message.type, message.event);
                 break;
 
             case 'answer':
+                if (message.userName) window.userNames[message.sessionId] = message.userName;
                 await handleAnswer(message.sessionId, message.sdp);
                 break;
 
@@ -139,7 +155,18 @@ socket.onmessage = async (event) => {
                 await handleRefresh(message.sessionId);
                 break;
 
+            case 'change-name':
+                if (message.userName) {
+                    window.userNames[message.sessionId] = message.userName;
+                    updateVideoLabel(message.sessionId);
+                    if (typeof window.updateMemberList === "function") {
+                        window.updateMemberList();
+                    }
+                }
+                break;
+
             case 'chat':
+                if (message.userName) window.userNames[message.sessionId] = message.userName;
                 if (typeof window.receiveChatMessage === 'function') {
                     window.receiveChatMessage(message.sessionId, message.message);
                 }
@@ -304,7 +331,14 @@ function addMemberVideo(sessionId, stream) {
     // 항상 새로운 `label`을 생성하여 추가
     const label = document.createElement("span");
     label.classList.add("video-label");
-    label.innerText = sessionId;
+    label.id = "label-" + sessionId;
+    label.innerText = getDisplayName(sessionId);
+    label.style.cursor = "pointer";
+    label.title = "이름 변경하기";
+    label.addEventListener("click", (e) => {
+        e.stopPropagation();
+        promptChangeName(sessionId);
+    });
     videoWrapper.appendChild(label); // `video-wrapper` 안에 추가
 
     // 클릭한 비디오를 모달에 표시하는 이벤트 리스너 추가
@@ -504,9 +538,30 @@ async function handleJoinMember(sessionId) {
     if (sessionId) {
         console.log('[first-join] sessionId : ', sessionId);
         mySessionId = sessionId;
+        
+        // 내 로컬 레이블 및 이름 설정
+        window.userNames[mySessionId] = window.myUserName;
+        if (myType === 'manager') {
+            const managerVideoContainer = document.querySelector('.manager-video-container');
+            if (managerVideoContainer && !document.getElementById("label-" + mySessionId)) {
+                const label = document.createElement("span");
+                label.classList.add("video-label");
+                label.id = "label-" + mySessionId;
+                label.innerText = window.myUserName + " (나)";
+                label.style.cursor = "pointer";
+                label.title = "이름 변경하기";
+                label.addEventListener("click", (e) => {
+                    e.stopPropagation();
+                    promptChangeName(mySessionId);
+                });
+                managerVideoContainer.appendChild(label);
+            }
+        }
+        
         socket.send(JSON.stringify({
             event: 'join-member',
-            sessionId: sessionId
+            sessionId: sessionId,
+            userName: window.myUserName
         }));
     }
 }
@@ -531,7 +586,8 @@ async function createOffer(sessionId) {
             event: 'offer',
             sdp: JSON.stringify(offer),
             sessionId: mySessionId,
-            recipientSessionId: sessionId
+            recipientSessionId: sessionId,
+            userName: window.myUserName
         }));
 
     } catch (error) {
@@ -613,7 +669,8 @@ async function sendAnswer(sessionId, answer) {
         event: 'answer',
         sdp: JSON.stringify(answer),
         sessionId: mySessionId,
-        recipientSessionId: sessionId
+        recipientSessionId: sessionId,
+        userName: window.myUserName
     }));
 }
 
@@ -786,6 +843,50 @@ function toggleCamera() {
     }
 }
 window.toggleCamera = toggleCamera;
+
+// 이름 변경 관련 함수
+function getDisplayName(sessionId) {
+    if (window.userNames[sessionId]) {
+        return window.userNames[sessionId];
+    }
+    const lastUnderscoreIndex = sessionId.lastIndexOf('_');
+    return lastUnderscoreIndex !== -1 ? sessionId.substring(0, lastUnderscoreIndex) : sessionId;
+}
+
+function updateVideoLabel(sessionId) {
+    const label = document.getElementById("label-" + sessionId);
+    if (label) {
+        label.innerText = getDisplayName(sessionId);
+    }
+}
+window.updateVideoLabel = updateVideoLabel;
+
+function promptChangeName(sessionId) {
+    // 본인의 이름만 바꿀 수 있도록
+    if (sessionId !== mySessionId && sessionId !== '나 (방장)') return;
+
+    const currentName = getDisplayName(sessionId).replace(" (나)", "");
+    const newName = prompt("변경할 이름을 입력하세요:", currentName);
+    
+    if (newName && newName.trim() !== "" && newName !== currentName) {
+        window.myUserName = newName.trim();
+        window.userNames[mySessionId] = window.myUserName;
+        if (sessionId === '나 (방장)') {
+            window.userNames['나 (방장)'] = window.myUserName + " (나)";
+        }
+        updateVideoLabel(mySessionId);
+        
+        if (typeof window.updateMemberList === "function") {
+            window.updateMemberList();
+        }
+
+        socket.send(JSON.stringify({
+            event: 'change-name',
+            sessionId: mySessionId,
+            userName: window.myUserName
+        }));
+    }
+}
 
 // 초대 링크 복사 기능
 function copyInviteLink() {

@@ -52,8 +52,19 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     startBtn.addEventListener('click', () => {
-        if(currentRoomCode) {
-            window.location.href = `/videoChat/${currentRoomCode}/manager`;
+        const nameInput = document.getElementById('create-name-input');
+        const name = nameInput ? nameInput.value.trim() : '';
+        const createError = document.getElementById('create-error');
+        
+        if (currentRoomCode && name) {
+            window.location.href = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}`;
+        } else if (!name) {
+            if (createError) {
+                createError.classList.remove('hidden');
+                setTimeout(() => {
+                    createError.classList.add('hidden');
+                }, 2000);
+            }
         }
     });
 
@@ -78,9 +89,13 @@ document.addEventListener('DOMContentLoaded', () => {
 
     joinBtn.addEventListener('click', () => {
         const code = joinCodeInput.value.trim();
-        if (code) {
-            window.location.href = `/videoChat/${code}/member`;
+        const nameInput = document.getElementById('join-name-input');
+        const name = nameInput ? nameInput.value.trim() : '';
+        
+        if (code && name) {
+            window.location.href = `/videoChat/${code}/member?name=${encodeURIComponent(name)}`;
         } else {
+            joinError.textContent = "코드와 이름을 모두 입력해주세요!";
             joinError.classList.remove('hidden');
             setTimeout(() => {
                 joinError.classList.add('hidden');
@@ -90,6 +105,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // Enter key support for join
     joinCodeInput.addEventListener('keypress', (e) => {
+        if (e.key === 'Enter') {
+            document.getElementById('join-name-input').focus();
+        }
+    });
+
+    document.getElementById('join-name-input').addEventListener('keypress', (e) => {
         if (e.key === 'Enter') {
             joinBtn.click();
         }

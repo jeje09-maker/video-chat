@@ -23,7 +23,13 @@ document.addEventListener("DOMContentLoaded", function () {
             let rows = 1;
 
             if (totalParticipants === 1) { columns = 1; rows = 1; }
-            else if (totalParticipants === 2) { columns = 2; rows = 1; }
+            else if (totalParticipants === 2) {
+                if (window.innerHeight > window.innerWidth) {
+                    columns = 1; rows = 2;
+                } else {
+                    columns = 2; rows = 1;
+                }
+            }
             else if (totalParticipants === 3 || totalParticipants === 4) { columns = 2; rows = 2; }
             else if (totalParticipants === 5 || totalParticipants === 6) { columns = 3; rows = 2; }
             else if (totalParticipants >= 7 && totalParticipants <= 9) { columns = 3; rows = 3; }
