@@ -530,6 +530,7 @@ async function handleJoinMember(sessionId) {
     if (sessionId) {
         console.log('[first-join] sessionId : ', sessionId);
         mySessionId = sessionId;
+        window.mySessionId = sessionId; // 전역 변수로 노출
         
         // 내 로컬 레이블 및 이름 설정
         if (myType === 'manager') {

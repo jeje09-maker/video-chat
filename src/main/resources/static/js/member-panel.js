@@ -12,29 +12,39 @@ document.addEventListener("DOMContentLoaded", function () {
         memberList.innerHTML = "";
         window.members.forEach(member => {
             const li = document.createElement("li");
-            li.textContent = member;
+            
+            // 이름 표시 (userNames 맵핑 활용)
+            const nameSpan = document.createElement("span");
+            nameSpan.textContent = window.userNames && window.userNames[member] ? window.userNames[member] : member;
+            nameSpan.style.flexGrow = "1";
+            nameSpan.style.whiteSpace = "nowrap";
+            nameSpan.style.overflow = "hidden";
+            nameSpan.style.textOverflow = "ellipsis";
+            li.appendChild(nameSpan);
 
+            // 방장인 경우에만 버튼 표시
             if (myType === 'manager') {
-                const createButton = (text, onClick) => {
-                    const button = document.createElement("button");
-                    button.textContent = text;
-                    button.style.width = '50px';
-                    button.style.height = '30px';
-                    button.style.fontSize = '10px';
-                    button.style.margin = '5px';
-                    button.style.borderRadius = '5px';
-                    button.style.border = '1px solid #ccc';
-                    button.style.backgroundColor = '#f0f0f0';
-                    button.style.cursor = 'pointer';
-                    button.addEventListener("click", onClick);
-                    return button;
-                };
+                const btnContainer = document.createElement("div");
+                btnContainer.style.display = "flex";
+                btnContainer.style.gap = "6px";
 
-                const kickButton = createButton('강퇴', () => kickMember(member));
-                const refreshButton = createButton('새로고침', () => refreshMember(member));
+                // 본인이 아닌 경우에만 강퇴/새로고침 버튼 표시
+                if (member !== window.mySessionId) {
+                    const kickButton = document.createElement("button");
+                    kickButton.textContent = "강퇴";
+                    kickButton.className = "member-action-btn kick-btn";
+                    kickButton.addEventListener("click", () => kickMember(member));
 
-                li.appendChild(kickButton);
-                li.appendChild(refreshButton);
+                    const refreshButton = document.createElement("button");
+                    refreshButton.textContent = "새로고침";
+                    refreshButton.className = "member-action-btn refresh-btn";
+                    refreshButton.addEventListener("click", () => refreshMember(member));
+
+                    btnContainer.appendChild(refreshButton);
+                    btnContainer.appendChild(kickButton);
+                }
+                
+                li.appendChild(btnContainer);
             }
 
             memberList.appendChild(li);

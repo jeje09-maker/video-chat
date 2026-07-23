@@ -218,9 +218,35 @@ video.memberVideo {
 #memberList li {
     display: flex;
     align-items: center;
-    padding: 12px;
-    font-size: 16px;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.2);
+    padding: 12px 15px;
+    font-size: 15px;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+/* 멤버 목록 내 액션 버튼 스타일 */
+.member-action-btn {
+    padding: 6px 10px;
+    font-size: 12px;
+    border-radius: 6px;
+    border: none;
+    cursor: pointer;
+    background: rgba(255, 255, 255, 0.15);
+    color: white;
+    white-space: nowrap;
+    transition: background 0.2s ease, transform 0.1s ease;
+    font-weight: 500;
+}
+.member-action-btn:hover {
+    transform: translateY(-1px);
+}
+.member-action-btn:active {
+    transform: translateY(1px);
+}
+.member-action-btn.refresh-btn:hover {
+    background: #3b82f6; /* 파란색 */
+}
+.member-action-btn.kick-btn:hover {
+    background: #ef4444; /* 빨간색 */
 }
 
 /* 모달 부모 컨테이너 (비디오 모달) */
