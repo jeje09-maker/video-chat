@@ -301,43 +301,56 @@ video.memberVideo {
     object-fit: cover;
     border-radius: 12px;
     border: 2px solid white;
-    box-shadow: 0 4px 15px rgba(0, 0, 0, 0.5);
-    z-index: 20;
-    transform: scaleX(-1); /* �ſ� ��� (�¿� ����) */
     transition: opacity 0.3s ease-in-out;
 }
-
 #localCameraVideo.show {
     display: block;
 }
-
 
 /* 발표자 보기 모드 */
 body.layout-speaker #managerVideoContainer {
     width: 100%;
 }
 body.layout-speaker #memberVideosContainer {
-    position: fixed;
-    top: 0;
-    right: -300px;
-    width: 250px;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.85);
+    position: absolute;
+    top: 20px;
+    left: 20px;
+    right: 20px;
+    height: 715px; /* Fits exactly 5 items of 135px height with 10px gaps */
+    background: transparent;
     z-index: 50;
-    transition: right 0.4s ease-in-out;
+    transition: opacity 0.4s ease-in-out;
     display: flex;
     flex-direction: column;
-    overflow-y: auto;
-    border-left: 2px solid rgba(0, 0, 0, 0.8);
+    flex-wrap: wrap;
+    align-content: space-between;
     gap: 10px;
-    padding-bottom: 60px;
+    pointer-events: none; /* Let clicks pass through empty space */
 }
-body.layout-speaker #memberVideosContainer.show {
-    right: 0;
+body.layout-speaker #memberVideosContainer.hidden {
+    opacity: 0;
+    pointer-events: none !important;
+}
+body.layout-speaker .video-wrapper {
+    width: 240px;
+    height: 135px; /* 16:9 ratio */
+    border-radius: 12px;
+    pointer-events: auto; /* Make thumbnails clickable */
+    border: 3px solid transparent;
+    transition: all 0.3s ease;
+    background: #111;
+    overflow: hidden;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+    cursor: pointer;
+}
+body.layout-speaker .video-wrapper:hover {
+    transform: scale(1.05);
+}
+body.layout-speaker .video-wrapper.selected-thumbnail {
+    border-color: #4ade80; /* 초록색 테두리 */
 }
 
 /* ============ 버튼 꺼짐 상태 (빨간 대각선) ============ */
-/* 마이크/카메라 버튼에 btn-muted 클래스를 붙이면 빨간 원 + 대각선 표시 */
 .btn-muted {
     position: relative;
 }
@@ -347,11 +360,10 @@ body.layout-speaker #memberVideosContainer.show {
     position: absolute;
     inset: 0;
     border-radius: 50%;
-    background: rgba(239, 68, 68, 0.25); /* 연한 빨간 원 배경 */
+    background: rgba(239, 68, 68, 0.25);
     pointer-events: none;
 }
 
-/* 대각선 빨간 줄 (왼쪽 위 → 오른쪽 아래) */
 .btn-muted::after {
     content: '';
     position: absolute;
@@ -373,7 +385,6 @@ body.layout-speaker #memberVideosContainer.show {
     transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
-/* Ÿ�� ���� ��� (layout-speaker�� ���� ��) */
 body:not(.layout-speaker) #videoContainer {
     display: grid !important;
     gap: 2px;

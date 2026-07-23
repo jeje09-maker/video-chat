@@ -306,6 +306,49 @@ function addManagerVideo(localStream) {
     managerVideo.muted = true;
     managerVideo.play().catch(e => console.warn('[addManagerVideo] play() 실패:', e));
     console.log('[addManagerVideo] srcObject 연결 완료. 트랙:', localStream.getTracks().map(t => t.kind + ':' + t.readyState + ':enabled=' + t.enabled));
+    
+    // 로컬 유저도 썸네일에 추가 및 기본 선택
+    if (mySessionId) {
+        addMemberVideo(mySessionId, localStream);
+        selectMainVideo(mySessionId, localStream);
+    } else {
+        // mySessionId가 아직 없다면 생성될 때 추가됨
+        setTimeout(() => {
+            if (mySessionId) {
+                addMemberVideo(mySessionId, localStream);
+                selectMainVideo(mySessionId, localStream);
+            }
+        }, 1000);
+    }
+}
+
+// 썸네일 클릭 시 메인 비디오를 교체하는 함수
+function selectMainVideo(sessionId, stream) {
+    // 모든 썸네일 테두리 초기화
+    document.querySelectorAll('.video-wrapper').forEach(wrapper => {
+        wrapper.classList.remove('selected-thumbnail');
+    });
+    
+    // 선택된 썸네일에 초록색 테두리 추가
+    const selectedWrapper = document.getElementById('wrapper-' + sessionId);
+    if (selectedWrapper) {
+        selectedWrapper.classList.add('selected-thumbnail');
+    }
+    
+    // 발표자 모드일 경우 메인 비디오 소스 교체
+    if (document.body.classList.contains('layout-speaker')) {
+        const managerVideo = document.getElementById('managerVideo');
+        if (managerVideo) {
+            managerVideo.srcObject = stream;
+            // 내 화면을 보면 muted true, 남의 화면이면 false (다만 WebRTC에서 받은 stream에 오디오가 있을 수 있음)
+            if (stream === window.localStream) {
+                managerVideo.muted = true;
+            } else {
+                managerVideo.muted = false;
+            }
+            managerVideo.play().catch(() => {});
+        }
+    }
 }
 
 // 멤버 화면 생성 + 멤버 이름 노출 + 멤버 리스트에 이름 추가
@@ -341,24 +384,10 @@ function addMemberVideo(sessionId, stream) {
     });
     videoWrapper.appendChild(label); // `video-wrapper` 안에 추가
 
-    // 클릭한 비디오를 모달에 표시하는 이벤트 리스너 추가
-    if(myType === 'manager') {
-        videoElement.addEventListener("click", () => showVideoModal(videoElement));
-        videoElement.style.cursor = 'pointer';
-
-        // 마우스를 올렸을 때 테두리 추가
-        videoElement.addEventListener("mouseenter", () => {
-            videoElement.style.border = '2px solid #007bff';
-            videoElement.style.position = 'relative';
-            videoElement.style.zIndex = '10';
-        });
-
-        videoElement.addEventListener("mouseleave", () => {
-            videoElement.style.border = '';
-            videoElement.style.position = '';
-            videoElement.style.zIndex = '';
-        });
-    }
+    // 클릭 시 메인 비디오로 설정
+    videoWrapper.addEventListener("click", () => {
+        selectMainVideo(sessionId, stream);
+    });
 
     // 멤버리스트에 사용자 추가 (중복 방지) : member-panel.js의 members 배열에 추가
     if (!window.members.includes(sessionId)) {
@@ -371,27 +400,8 @@ function addMemberVideo(sessionId, stream) {
     }
 }
 
-// 클릭한 비디오를 모달에 표시하고 오버레이를 활성화하는 함수
-function showVideoModal(emptyVideoSlot) {
-    console.log(`비디오 ${emptyVideoSlot.id} 클릭.`);
-
-    // 모달에서 사용할 세션 ID를 설정
-    document.getElementById('videoModalSessionId').value = emptyVideoSlot.id;
-
-    // 비디오 삽입
-    const videoModal = document.getElementById('videoModal');
-    videoModal.srcObject = emptyVideoSlot.srcObject;
-
-    // 멤버 비디오 모달 열기
-    const memberVideoModal = document.getElementById("memberVideoModal");
-    memberVideoModal.style.display = "flex";
-    setTimeout(() => memberVideoModal.classList.add("show"), 10); // 약간의 지연 후 애니메이션 적용
-
-    // 우측 멤버 카메라 오버레이를 보이게 설정
-    document.querySelectorAll(".overlay").forEach(overlayElement => {
-        overlayElement.style.display = "block";
-    });
-}
+// 클릭한 비디오를 모달에 표시하는 기존 함수는 더 이상 사용하지 않지만 화면 공유 등에서 쓸 수 있으니 남겨두거나 삭제 가능
+// 현재는 썸네일 클릭 시 selectMainVideo가 호출됩니다.
 
 // 클릭한 비디오를 모달에서 제거하고 오버레이를 비활성화하는 함수
 function closeVideoModal() {
@@ -1147,9 +1157,9 @@ window.toggleMemberVideoPanel = function() {
     const panel = document.getElementById('memberVideosContainer');
     if (!panel) return;
     
-    if (panel.classList.contains('show')) {
-        panel.classList.remove('show');
+    if (panel.classList.contains('hidden')) {
+        panel.classList.remove('hidden');
     } else {
-        panel.classList.add('show');
+        panel.classList.add('hidden');
     }
 };

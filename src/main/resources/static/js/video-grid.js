@@ -11,8 +11,8 @@ document.addEventListener("DOMContentLoaded", function () {
             videoContainer.style.gridTemplateColumns = '';
             videoContainer.style.gridTemplateRows = '';
             
-            memberVideosContainer.style.gridTemplateColumns = '1fr';
-            memberVideosContainer.style.gridTemplateRows = `repeat(${currentSlots}, minmax(150px, auto))`;
+            memberVideosContainer.style.gridTemplateColumns = '';
+            memberVideosContainer.style.gridTemplateRows = '';
         } else {
             // 타일 모드에서는 전체 컨테이너가 그리드
             memberVideosContainer.style.gridTemplateColumns = '';
