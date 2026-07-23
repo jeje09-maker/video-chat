@@ -367,7 +367,7 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 for (String param : params) {
                     if (param.startsWith("name=")) {
                         String name = param.substring(5);
-                        name = java.net.URLDecoder.decode(name, java.nio.charset.StandardCharsets.UTF_8);
+                        name = java.net.URLDecoder.decode(name, "UTF-8");
                         if (!name.trim().isEmpty()) {
                             return name.trim() + "_" + session.getId().substring(0, 4);
                         }
