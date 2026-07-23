@@ -1002,14 +1002,14 @@ function appendChatMessage(sender, msg, isMe) {
     
     if (isMe) {
         div.style.alignSelf = "flex-end";
-        div.style.backgroundColor = "#007bff";
+        div.style.backgroundColor = "rgba(0, 123, 255, 0.8)";
         div.style.color = "white";
         div.innerHTML = `<span>${msg}</span>`;
     } else {
         div.style.alignSelf = "flex-start";
-        div.style.backgroundColor = "#e9ecef";
-        div.style.color = "black";
-        div.innerHTML = `<span style="font-size: 0.8em; color: #555; margin-bottom: 3px; display: block; font-weight: bold;">${sender}</span><span>${msg}</span>`;
+        div.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
+        div.style.color = "white";
+        div.innerHTML = `<span style="font-size: 0.8em; color: rgba(255,255,255,0.7); margin-bottom: 3px; display: block; font-weight: bold;">${sender}</span><span>${msg}</span>`;
     }
     
     container.appendChild(div);
