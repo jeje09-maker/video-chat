@@ -16,11 +16,12 @@ window.myUserName = userName;
 let mySessionId = '';
 let peerConnections = {};  // 각 방의 PeerConnection 관리
 let signalingQueues = {};  // 각 PeerConnection Offer/Answer 처리를 위한 큐 관리 객체
-let sentIceCandidates = new Set();  // 중복된 ICE 후보 전송 방지용
+// ICE 후보 중복 방지는 PeerConnection 별로 관리 (전역 Set 공유 시 다른 peer 연결 막힘)
 
 window.localStream = null;
-// member-panel.js 보다 먼저 초기화해서 타이밍 문제 방지
-window.members = window.members || [];
+// member-panel.js의 window.members=[] 재초기화에 의해 덮어쓰이지 않도록
+// webrtc.js가 먼저 로드되므로 여기서 배열 선언, member-panel은 이미 있으면 재사용
+if (!window.members) window.members = [];
 
 // WebSocket 연결
 const socketNameParam = userName ? `?name=${encodeURIComponent(userName)}` : '';
@@ -89,11 +90,14 @@ socket.onmessage = async (event) => {
                     console.error("미디어 스트림 설정 실패:", error);
                 }
 
-                // 관리자 화면 생성 (managerVideo 엘리먼트가 있으면 방장 화면 띄움)
-                if (document.getElementById('managerVideo')) addManagerVideo(window.localStream);
-
-                // 멤버 화면 생성 (멤버일 경우 멤버 패널에도 띄움)
-                if (myType === 'member') addMemberVideo(message.sessionId, window.localStream);
+                // 방장: managerVideo에 내 영상 연결 (썸네일 추가는 handleJoinMember에서 mySessionId 확정 후)
+                if (document.getElementById('managerVideo')) {
+                    const managerVideo = document.getElementById('managerVideo');
+                    managerVideo.srcObject = window.localStream;
+                    managerVideo.muted = true;
+                    managerVideo.play().catch(e => console.warn('[first-join] managerVideo play() 실패:', e));
+                }
+                // 멤버: 자기 영상 썸네일 추가는 handleJoinMember에서 mySessionId 확정 후 처리
             }
         }
 
@@ -276,29 +280,15 @@ function createSilentAudioTrack() {
     return destination.stream.getAudioTracks()[0];
 }
 
-// 관리자 화면 생성 - 카메라 스트림을 managerVideo에 직접 연결
+// 관리자 화면 생성 - srcObject 연결만 담당 (썸네일/멤버리스트 추가는 handleJoinMember에서)
 function addManagerVideo(localStream) {
     const managerVideo = document.getElementById('managerVideo');
     if (!managerVideo) { console.error('[addManagerVideo] managerVideo 엘리먼트를 찾을 수 없습니다.'); return; }
     managerVideo.srcObject = localStream;
-    // 자동재생 정책 대응: muted + play() 강제 호출
     managerVideo.muted = true;
     managerVideo.play().catch(e => console.warn('[addManagerVideo] play() 실패:', e));
-    console.log('[addManagerVideo] srcObject 연결 완료. 트랙:', localStream.getTracks().map(t => t.kind + ':' + t.readyState + ':enabled=' + t.enabled));
-    
-    // 로컬 유저도 썸네일에 추가 및 기본 선택
-    if (mySessionId) {
-        addMemberVideo(mySessionId, localStream);
-        selectMainVideo(mySessionId, localStream);
-    } else {
-        // mySessionId가 아직 없다면 생성될 때 추가됨
-        setTimeout(() => {
-            if (mySessionId) {
-                addMemberVideo(mySessionId, localStream);
-                selectMainVideo(mySessionId, localStream);
-            }
-        }, 1000);
-    }
+    console.log('[addManagerVideo] 완료. 트랙:', localStream.getTracks().map(t => t.kind + ':' + t.readyState + ':enabled=' + t.enabled));
+    // ※ 썸네일(addMemberVideo) 추가는 handleJoinMember에서 mySessionId 확정 후 호출
 }
 
 // 썸네일 클릭 시 메인 비디오를 교체하는 함수
@@ -475,11 +465,13 @@ async function createPeerConnection(sessionId, type, event) {
     // 내 로컬 미디어 트랙(비디오/오디오)을 `peerConnection`에 추가 (상대방과 공유할 트랙 설정)
     window.localStream.getTracks().forEach(track => peerConnection.addTrack(track, window.localStream));
 
+    // ICE 후보 중복 방지 Set — PeerConnection 별로 분리
+    const myIceCandidates = new Set();
     peerConnection.onicecandidate = (event) => {
         if (event.candidate) {
             const candidateStr = JSON.stringify(event.candidate);
-            if (!sentIceCandidates.has(candidateStr)) {
-                sentIceCandidates.add(candidateStr);
+            if (!myIceCandidates.has(candidateStr)) {
+                myIceCandidates.add(candidateStr);
                 sendIceCandidate(sessionId, event.candidate);
             }
         }
@@ -529,40 +521,36 @@ async function createPeerConnection(sessionId, type, event) {
 // join-member 수신
 async function handleJoinMember(sessionId) {
     console.log('[first-join] 수신');
-    if (sessionId) {
-        console.log('[first-join] sessionId : ', sessionId);
-        mySessionId = sessionId;
-        window.mySessionId = sessionId; // 전역 변수로 노출
-        
-        // 내 로컬 레이블 및 이름 설정
-        if (myType === 'manager') {
-            window.userNames[mySessionId] = window.myUserName + " (방장)";
-        } else {
-            window.userNames[mySessionId] = window.myUserName;
-        }
-        if (myType === 'manager') {
-            const managerVideoContainer = document.querySelector('.manager-video-container');
-            if (managerVideoContainer && !document.getElementById("label-" + mySessionId)) {
-                const label = document.createElement("span");
-                label.classList.add("video-label");
-                label.id = "label-" + mySessionId;
-                label.innerText = window.myUserName + " (나)";
-                label.style.cursor = "pointer";
-                label.title = "이름 변경하기";
-                label.addEventListener("click", (e) => {
-                    e.stopPropagation();
-                    promptChangeName(mySessionId);
-                });
-                managerVideoContainer.appendChild(label);
-            }
-        }
-        
-        socket.send(JSON.stringify({
-            event: 'join-member',
-            sessionId: sessionId,
-            userName: window.myUserName
-        }));
+    if (!sessionId) return;
+
+    console.log('[first-join] sessionId : ', sessionId);
+    mySessionId = sessionId;
+    window.mySessionId = sessionId;
+
+    // 이름 설정
+    if (myType === 'manager') {
+        window.userNames[mySessionId] = window.myUserName + " (방장)";
+    } else {
+        window.userNames[mySessionId] = window.myUserName;
     }
+
+    // ── 내 로컬 스트림이 준비된 경우 자기 자신 썸네일 추가 (한 번만)
+    if (window.localStream) {
+        // 중복 방지: 이미 wrapper가 있으면 추가 안 함
+        if (!document.getElementById('wrapper-' + mySessionId)) {
+            addMemberVideo(mySessionId, window.localStream);
+        }
+        // 방장: 발표자 모드 메인 비디오 선택
+        if (myType === 'manager') {
+            selectMainVideo(mySessionId, window.localStream);
+        }
+    }
+
+    socket.send(JSON.stringify({
+        event: 'join-member',
+        sessionId: sessionId,
+        userName: window.myUserName
+    }));
 }
 
 // Offer 전송

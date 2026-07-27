@@ -3,8 +3,8 @@ document.addEventListener("DOMContentLoaded", function () {
     const closeMemberListPanelBtn = document.getElementById("closeMemberListPanel");
     const memberListPanel = document.getElementById("memberListPanel");
 
-    // 현재 접속 중인 멤버 리스트 (전역 변수)
-    window.members = [];
+    // 현재 접속 중인 멤버 리스트 (전역 변수) — webrtc.js가 먼저 선언하므로 있으면 재사용
+    if (!window.members) window.members = [];
 
     // 멤버 목록을 화면에 표시하는 함수
     window.updateMemberList = function () {
