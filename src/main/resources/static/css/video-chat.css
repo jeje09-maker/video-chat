@@ -186,22 +186,13 @@ video.memberVideo {
 }
 
 
-/* 화면 공유 버튼 스타일 */
+/* 화면 공유 버튼 — 다른 menu-btn과 동일하게 배경 이미지 제거 */
 #toggleScreenShare {
-    width: 40px;
-    height: 40px;
-    background: url('../images/screen-share.png') no-repeat center;
-    background-color: rgba(255, 255, 255, 0.5);
-    background-size: 60%;
+    background: transparent;
     border: none;
     border-radius: 8px;
     cursor: pointer;
-    transition: background-color 0.3s ease;
-}
-
-/* 화면 공유 버튼 호버 효과 */
-#toggleScreenShare:hover {
-    background-color: rgba(255, 255, 255, 0.9);
+    transition: filter 0.2s ease, transform 0.15s ease;
 }
 
 /* 멤버리스트 버튼 스타일 */
