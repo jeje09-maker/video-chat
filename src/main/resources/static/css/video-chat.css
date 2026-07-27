@@ -201,7 +201,7 @@ video.memberVideo {
         display: flex !important;
         flex-direction: row !important;
         flex-wrap: wrap-reverse !important; /* 아래부터 차곡차곡 위로 */
-        justify-content: center !important;
+        justify-content: flex-start !important; /* 왼쪽부터 채움 */
         align-content: flex-end !important;
         gap: 8px !important;
     }
@@ -511,10 +511,12 @@ body.layout-speaker .video-wrapper {
     width: 160px;
     height: 120px;
 }
-@media (max-width: 600px) and (orientation: portrait) {
+@media (max-width: 768px) and (orientation: portrait) {
     body.layout-speaker .video-wrapper {
-        width: 100px;
-        height: 130px; /* 3:4 비율에 가깝게 */
+        /* 한 줄에 정확히 4개가 들어가도록 너비 지정 (gap 8px, 3개의 gap = 24px) */
+        width: calc(25% - 6px) !important;
+        aspect-ratio: 3/4;
+        height: auto !important;
     }
 }
 /* 버튼 호버 효과 (메뉴바 아이콘) — .menu-btn으로 대체됨, 기존 규칙 유지 */
