@@ -549,7 +549,8 @@ async function handleJoinMember(sessionId) {
     socket.send(JSON.stringify({
         event: 'join-member',
         sessionId: sessionId,
-        userName: window.myUserName
+        userName: window.myUserName,
+        type: window.myType
     }));
 }
 
@@ -574,7 +575,8 @@ async function createOffer(sessionId) {
             sdp: JSON.stringify(offer),
             sessionId: mySessionId,
             recipientSessionId: sessionId,
-            userName: window.myUserName
+            userName: window.myUserName,
+            type: window.myType
         }));
 
     } catch (error) {
@@ -657,7 +659,8 @@ async function sendAnswer(sessionId, answer) {
         sdp: JSON.stringify(answer),
         sessionId: mySessionId,
         recipientSessionId: sessionId,
-        userName: window.myUserName
+        userName: window.myUserName,
+        type: window.myType
     }));
 }
 
