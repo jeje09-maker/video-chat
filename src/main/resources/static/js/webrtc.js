@@ -202,13 +202,9 @@ async function getMediaStream() {
         if ("granted" === micPermissions.microphone || "prompt" === micPermissions.microphone) {
             if (hasAudio) {
                 audioStream = await navigator.mediaDevices.getUserMedia({audio: true});
-                // 오디오 트랙 비활성화 (음소거)
+                // 모든 참가자(관리자/멤버 모두) 마이크 기본 활성화
                 audioStream.getAudioTracks().forEach(track => {
-                    if (myType === 'manager') {
-                        track.enabled = true;
-                    } else {
-                        track.enabled = false;
-                    }
+                    track.enabled = true;
                 });
             } else {
                 console.warn("사용 가능한 마이크가 없습니다. 무음 트랙을 반환합니다.");
@@ -496,21 +492,27 @@ async function createPeerConnection(sessionId, type, event) {
             addedStreams.add(event.streams[0].id);
 
             const stream = event.streams[0];
-            
+
             // 모든 사람(방장 포함)을 썸네일에 추가
             addMemberVideo(sessionId, stream);
 
-            // 관리자 화면 수신 시 (내가 멤버일 때)
+            // 관리자 화면 수신 시 (내가 멤버일 때) 메인 화면으로 설정
             if (type === 'manager') {
-                // 관리자 영상을 메인 화면으로 설정
                 selectMainVideo(sessionId, stream);
-
-                // 오디오 태그를 따로 생성해서 관리자 소리 재생
-                const audioElement = new Audio();
-                audioElement.srcObject = stream;
-                audioElement.autoplay = true;
-                audioElement.play();
             }
+
+            // 원격 스트림의 오디오를 재생 (자신의 로컬 스트림은 제외 — 하울링 방지)
+            // 모든 참가자 조합(멤버↔멤버, 멤버↔관리자)에 대해 오디오 재생
+            const audioElementId = 'remote-audio-' + sessionId;
+            let audioElement = document.getElementById(audioElementId);
+            if (!audioElement) {
+                audioElement = new Audio();
+                audioElement.id = audioElementId;
+                audioElement.autoplay = true;
+                document.body.appendChild(audioElement);
+            }
+            audioElement.srcObject = stream;
+            audioElement.play().catch(e => console.warn('[ontrack] audio play() 실패:', e));
 
         } else {
             console.log("중복된 ontrack 실행 방지됨.");
@@ -950,170 +952,6 @@ function appendChatMessage(sender, msg, isMe) {
     container.appendChild(div);
     container.scrollTop = container.scrollHeight;
 }
-
-// ice-candidate 수신
-async function handleIceCandidate(sessionId, candidate) {
-    console.log('[ice-candidate] 수신')
-    const peerConnection = peerConnections[sessionId];
-
-    try {
-        const parsedCandidate = new RTCIceCandidate(JSON.parse(candidate));
-        await peerConnection.addIceCandidate(parsedCandidate);
-    } catch (error) {
-        console.error("ICE 후보 처리 중 오류 발생:", error);
-    }
-}
-
-// microphone 전송
-function sendMicrophone(value) {
-    console.log('[microphone] 전송')
-
-    const sessionId = document.getElementById('videoModalSessionId').value;
-    if (sessionId) {
-
-        const microphoneControlBtn = document.getElementById('microphoneControlBtn');
-
-        let isEnabled;
-
-        // 모달 창 닫기
-        if (value === false) {
-            microphoneControlBtn.style.backgroundImage = "url('/images/mic-enabled-false.png')";
-            document.getElementById('microphoneIsEnabled').value = 'false';
-            isEnabled = 'false';
-
-            // inEnabled 토글 처리
-        } else {
-            isEnabled = document.getElementById('microphoneIsEnabled').value;
-            if (isEnabled === 'false') {
-                microphoneControlBtn.style.backgroundImage = "url('/images/mic-enabled-true.png')";
-                document.getElementById('microphoneIsEnabled').value = 'true';
-                isEnabled = 'true';
-
-            } else if (isEnabled === 'true') {
-                microphoneControlBtn.style.backgroundImage = "url('/images/mic-enabled-false.png')";
-                document.getElementById('microphoneIsEnabled').value = 'false';
-                isEnabled = 'false';
-
-            } else {
-                console.log('isEnabled 값이 없습니다.');
-                return;
-            }
-        }
-
-        socket.send(JSON.stringify({
-            event: 'microphone',
-            isEnabled: isEnabled,
-            sessionId: mySessionId,
-            recipientSessionId: sessionId
-        }));
-
-    } else {
-        console.log('[microphone] sessionId 값이 없습니다.')
-    }
-}
-
-// microphone 수신
-async function handleMicrophone(sessionId, isEnabled) {
-    console.log('[microphone] 수신');
-
-    if (peerConnections[sessionId]) {
-        console.log('[microphone] isEnabled : ', isEnabled);
-        window.localStream.getAudioTracks().forEach(track => {
-            if (isEnabled === 'true') {
-                track.enabled = true;
-            } else if (isEnabled === 'false') {
-                track.enabled = false;
-            }
-        });
-    }
-}
-
-// kick 수신
-async function handleKick(sessionId) {
-    console.log('[kick] 수신');
-
-    if (peerConnections[sessionId]) {
-        window.location.href = `/videoChat/${roomId}/kickedOut`;
-    }
-}
-
-// refresh 수신
-async function handleRefresh(sessionId) {
-    console.log('[refresh] 수신');
-
-    if (peerConnections[sessionId]) {
-        window.location.reload();
-    }
-}
-
-
-
-// 초대 링크 복사 기능
-function copyInviteLink() {
-    const rId = window.location.pathname.split("/")[2];
-    const inviteUrl = window.location.origin + "/videoChat/" + rId + "/member";
-    navigator.clipboard.writeText(inviteUrl).then(() => {
-        alert("채팅방 초대 링크가 복사되었습니다!\n원하는 곳에 붙여넣기(Ctrl+V) 하여 사람들을 초대하세요.\n" + inviteUrl);
-    }).catch(err => {
-        console.error("초대 링크 복사 실패", err);
-        alert("초대 링크 복사에 실패했습니다. 브라우저 권한을 확인해주세요.");
-    });
-}
-window.copyInviteLink = copyInviteLink;
-
-// ---------------------- 채팅 기능 ----------------------
-function sendChatMessage() {
-    const input = document.getElementById('chatInput');
-    const msg = input.value.trim();
-    if (!msg) return;
-
-    // 화면에 내 메시지 표시
-    appendChatMessage("나", msg, true);
-    input.value = '';
-
-    // 서버로 전송
-    if (socket.readyState === WebSocket.OPEN) {
-        socket.send(JSON.stringify({
-            event: 'chat',
-            sessionId: mySessionId || "나",
-            message: msg
-        }));
-    }
-}
-window.sendChatMessage = sendChatMessage;
-
-function receiveChatMessage(senderId, msg) {
-    appendChatMessage(senderId, msg, false);
-}
-window.receiveChatMessage = receiveChatMessage;
-
-function appendChatMessage(sender, msg, isMe) {
-    const container = document.getElementById('chatMessages');
-    if (!container) return;
-
-    const div = document.createElement('div');
-    div.style.maxWidth = "80%";
-    div.style.padding = "8px 12px";
-    div.style.borderRadius = "8px";
-    div.style.marginBottom = "5px";
-    div.style.wordBreak = "break-word";
-    
-    if (isMe) {
-        div.style.alignSelf = "flex-end";
-        div.style.backgroundColor = "rgba(0, 123, 255, 0.8)";
-        div.style.color = "white";
-        div.innerHTML = `<span>${msg}</span>`;
-    } else {
-        div.style.alignSelf = "flex-start";
-        div.style.backgroundColor = "rgba(255, 255, 255, 0.15)";
-        div.style.color = "white";
-        div.innerHTML = `<span style="font-size: 0.8em; color: rgba(255,255,255,0.7); margin-bottom: 3px; display: block; font-weight: bold;">${sender}</span><span>${msg}</span>`;
-    }
-    
-    container.appendChild(div);
-    container.scrollTop = container.scrollHeight;
-}
-window.appendChatMessage = appendChatMessage;
 
 // ---------------------- 뷰 모드 및 패널 토글 기능 ----------------------
 window.toggleViewMode = function() {

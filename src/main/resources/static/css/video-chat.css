@@ -64,38 +64,127 @@ video.memberVideo {
     border: 2px solid rgba(0, 0, 0, 0.8);
 }
 
-/* 하단 메뉴바 (화면 공유 버튼 포함) */
+/* 하단 메뉴바 */
 #managerMenuBar {
     position: absolute;
-    bottom: 0;
-    width: 100%;
-    height: 60px; /* 터치를 위해 높이 살짝 증가 */
-    background-color: rgba(0, 0, 0, 0.6);
+    bottom: 20px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: auto;
+    max-width: calc(100% - 20px);
+    background-color: rgba(0, 0, 0, 0.75);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
     display: flex;
-    justify-content: center;
+    flex-wrap: nowrap;       /* 기본: 한 줄 */
+    gap: 6px;
+    padding: 10px 20px;
+    border-radius: 30px;
+    z-index: 100;
     align-items: center;
-    gap: 10px;
-    z-index: 11;
-    overflow-x: auto;
-    white-space: nowrap;
-    padding: 0 10px;
+    justify-content: center;
     box-sizing: border-box;
-    /* 스크롤바 숨기기 */
-    -ms-overflow-style: none; /* IE, Edge */
-    scrollbar-width: none; /* Firefox */
+    /* 스크롤바 숨기기 (가로 스크롤 fallback) */
+    overflow-x: auto;
+    -ms-overflow-style: none;
+    scrollbar-width: none;
 }
-#managerMenuBar::-webkit-scrollbar {
-    display: none; /* Chrome, Safari */
+#managerMenuBar::-webkit-scrollbar { display: none; }
+
+/* 메뉴 버튼 공통 */
+.menu-btn {
+    background: transparent;
+    color: white;
+    border: none;
+    cursor: pointer;
+    transition: transform 0.15s ease, opacity 0.15s ease, filter 0.15s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 4px 2px;
+    flex-shrink: 0;
+    border-radius: 8px;
 }
-#managerMenuBar > * {
-    flex-shrink: 0; /* 메뉴 버튼들이 작아지지 않게 방지 */
+.menu-btn:not(:disabled):hover {
+    transform: translateY(-2px);
+    filter: brightness(1.3);
+}
+.menu-btn:disabled {
+    opacity: 0.35;
+    cursor: not-allowed;
 }
 
-@media (max-width: 768px) {
+/* 메뉴 아이콘 */
+.menu-icon {
+    font-size: 28px;
+    display: block;
+    line-height: 1;
+}
+
+/* 녹화/녹음 버튼 하단 레이블 */
+.menu-btn-label {
+    font-size: 9px;
+    color: rgba(255,255,255,0.7);
+    text-align: center;
+    margin-top: 1px;
+    line-height: 1;
+}
+
+/* 구분선 */
+.menu-divider {
+    width: 1px;
+    height: 24px;
+    background: rgba(255,255,255,0.25);
+    margin: 0 2px;
+    flex-shrink: 0;
+}
+
+/* ── 모바일 세로 (portrait) 대응 ── */
+@media (max-width: 600px) and (orientation: portrait) {
     #managerMenuBar {
-        justify-content: flex-start; /* 모바일에서는 좌측 정렬 후 스크롤되도록 */
+        bottom: 10px;
+        bottom: calc(10px + env(safe-area-inset-bottom)); /* iPhone 노치 대응 */
+        border-radius: 18px;
+        padding: 8px 10px;
+        gap: 4px;
+        flex-wrap: wrap;            /* 두 줄로 줄바꿈 */
+        justify-content: center;
+        max-width: calc(100% - 12px);
+        max-height: 110px;
+    }
+    .menu-icon {
+        font-size: 20px;            /* 아이콘 축소 */
+    }
+    .menu-btn {
+        padding: 3px 2px;
+    }
+    .menu-btn-label {
+        font-size: 8px;
+    }
+    .menu-divider {
+        display: none;              /* 구분선 숨겨서 공간 절약 */
     }
 }
+
+/* ── 모바일 가로 (landscape, 높이가 낮음) ── */
+@media (max-height: 500px) {
+    #managerMenuBar {
+        bottom: 6px;
+        padding: 6px 14px;
+        gap: 4px;
+        border-radius: 20px;
+    }
+    .menu-icon {
+        font-size: 22px;
+    }
+    .menu-btn-label {
+        display: none;              /* 레이블 숨김 */
+    }
+    .menu-divider {
+        height: 18px;
+    }
+}
+
 
 /* 화면 공유 버튼 스타일 */
 #toggleScreenShare {
@@ -410,10 +499,9 @@ body.layout-speaker .video-wrapper.selected-thumbnail {
     box-shadow: 0 0 4px rgba(239,68,68,0.7);
 }
 
-/* 버튼 호버 효과 (메뉴바 아이콘) */
+/* 버튼 호버 효과 (메뉴바 아이콘) — .menu-btn으로 대체됨, 기존 규칙 유지 */
 #managerMenuBar button:hover {
     opacity: 0.75;
-    transform: scale(1.15);
     transition: transform 0.15s ease, opacity 0.15s ease;
 }
 
@@ -428,5 +516,40 @@ body:not(.layout-speaker) #managerVideoContainer {
 }
 body:not(.layout-speaker) #memberVideosContainer {
     display: contents !important;
+}
+
+/* ───── 녹화 기능 스타일 ───── */
+
+/* 빨간 점 깜빡임 애니메이션 */
+@keyframes recording-pulse {
+    0%   { opacity: 1; transform: scale(1); }
+    50%  { opacity: 0.3; transform: scale(0.85); }
+    100% { opacity: 1; transform: scale(1); }
+}
+
+#recordingIndicator.recording-blink {
+    display: inline-block !important;
+    animation: recording-pulse 1.2s ease-in-out infinite;
+}
+
+/* 녹화/녹음 중 버튼 활성 상태 */
+#managerMenuBar button.btn-recording {
+    background: rgba(255, 71, 87, 0.2) !important;
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px #ff4757;
+    animation: recording-pulse 1.2s ease-in-out infinite;
+}
+
+/* 메뉴바 버튼 hover 효과 — .menu-btn 클래스로 통합됨 */
+#managerMenuBar button.btn-recording {
+    background: rgba(255, 71, 87, 0.2) !important;
+    border-radius: 10px;
+    box-shadow: 0 0 0 2px #ff4757;
+    animation: recording-pulse 1.2s ease-in-out infinite;
+}
+
+/* 녹화 상태바 */
+#recordingStatusBar {
+    transition: opacity 0.3s ease;
 }
 

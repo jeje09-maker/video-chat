@@ -58,34 +58,55 @@
 
 
 
-        <!-- 메뉴바 추가 -->
-        <div id="managerMenuBar" style="background-color: rgba(0, 0, 0, 0.7); display: flex; gap: 20px; padding: 12px 25px; border-radius: 30px; bottom: 20px; width: auto; position: absolute; left: 50%; transform: translateX(-50%); z-index: 100; align-items: center; justify-content: center;">
-            <button id="toggleAudioBtn" onclick="window.toggleAudio()" title="마이크 켜기/끄기" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;" id="audioIcon">mic</span>
+        <!-- 녹화 상태 표시 (빨간 점 + 타이머) -->
+        <div id="recordingStatusBar" style="display:none; position:absolute; top:14px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); border-radius:20px; padding:5px 14px; z-index:200; align-items:center; gap:8px; pointer-events:none;">
+            <span id="recordingIndicator" style="display:none; width:10px; height:10px; border-radius:50%; background:#ff4757;"></span>
+            <span id="recordingTimer" style="display:none; color:#fff; font-size:13px; font-weight:600; letter-spacing:1px; font-family:monospace;">00:00</span>
+        </div>
+
+        <!-- 메뉴바 -->
+        <div id="managerMenuBar">
+            <button id="toggleAudioBtn" onclick="window.toggleAudio()" title="마이크 켜기/끄기" class="menu-btn">
+                <span class="material-symbols-outlined menu-icon" id="audioIcon">mic</span>
             </button>
-            <button id="toggleCameraBtn" onclick="window.toggleCamera()" title="카메라 켜기/끄기" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;" id="cameraIcon">videocam</span>
+            <button id="toggleCameraBtn" onclick="window.toggleCamera()" title="카메라 켜기/끄기" class="menu-btn">
+                <span class="material-symbols-outlined menu-icon" id="cameraIcon">videocam</span>
             </button>
-            <button id="toggleScreenShare" title="화면 공유" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;">present_to_all</span>
+            <button id="toggleScreenShare" title="화면 공유" class="menu-btn">
+                <span class="material-symbols-outlined menu-icon">present_to_all</span>
             </button>
-            <button id="inviteBtn" onclick="window.copyInviteLink()" title="초대하기" style="background: transparent; color: #4ade80; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;">person_add</span>
+            <button id="inviteBtn" onclick="window.copyInviteLink()" title="초대하기" class="menu-btn" style="color: #4ade80;">
+                <span class="material-symbols-outlined menu-icon">person_add</span>
             </button>
-            <button id="toggleChatBtn" onclick="const p = document.getElementById('chatPanel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none';" title="채팅하기" style="background: transparent; color: #60a5fa; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;">chat</span>
+            <button id="toggleChatBtn" onclick="const p = document.getElementById('chatPanel'); p.style.display = p.style.display === 'none' ? 'flex' : 'none';" title="채팅하기" class="menu-btn" style="color: #60a5fa;">
+                <span class="material-symbols-outlined menu-icon">chat</span>
             </button>
-            <button id="toggleMemberVideoBtn" onclick="window.toggleMemberVideoPanel()" title="참가자 영상 열기/닫기" style="background: transparent; color: #f472b6; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;">video_library</span>
+            <button id="toggleMemberVideoBtn" onclick="window.toggleMemberVideoPanel()" title="참가자 영상 열기/닫기" class="menu-btn" style="color: #f472b6;">
+                <span class="material-symbols-outlined menu-icon">video_library</span>
             </button>
-            <button id="toggleBgBtn" onclick="document.getElementById('bgModal').style.display = document.getElementById('bgModal').style.display === 'none' ? 'block' : 'none';" title="배경" style="background: transparent; color: #a855f7; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;">landscape</span>
+            <button id="toggleBgBtn" onclick="document.getElementById('bgModal').style.display = document.getElementById('bgModal').style.display === 'none' ? 'block' : 'none';" title="배경" class="menu-btn" style="color: #a855f7;">
+                <span class="material-symbols-outlined menu-icon">landscape</span>
             </button>
-            <button id="toggleViewBtn" onclick="window.toggleViewMode()" title="타일 보기 전환" style="background: transparent; color: #fbbf24; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;" id="viewIcon">grid_view</span>
+            <button id="toggleViewBtn" onclick="window.toggleViewMode()" title="타일 보기 전환" class="menu-btn" style="color: #fbbf24;">
+                <span class="material-symbols-outlined menu-icon" id="viewIcon">grid_view</span>
             </button>
-            <button id="toggleMemberListPanel" title="참가자 명단" style="background: transparent; color: white; border: none; cursor: pointer; transition: 0.2s;">
-                <span class="material-symbols-outlined" style="font-size: 28px;">group</span>
+            <button id="toggleMemberListPanel" title="참가자 명단" class="menu-btn">
+                <span class="material-symbols-outlined menu-icon">group</span>
+            </button>
+
+            <!-- 구분선 -->
+            <div id="recordingDivider" class="menu-divider"></div>
+
+            <!-- 녹화 버튼 (방장 전용) -->
+            <button id="toggleRecordBtn" onclick="window.toggleVideoRecord()" title="회의 녹화 시작/중지" class="menu-btn" style="color: #ff6b6b;">
+                <span class="material-symbols-outlined menu-icon" id="recordIcon">videocam</span>
+                <div class="menu-btn-label">녹화</div>
+            </button>
+
+            <!-- 녹음 버튼 (방장 전용) -->
+            <button id="toggleAudioRecordBtn" onclick="window.toggleAudioRecord()" title="회의 녹음 시작/중지" class="menu-btn" style="color: #ff9f43;">
+                <span class="material-symbols-outlined menu-icon" id="audioRecordIcon">mic_none</span>
+                <div class="menu-btn-label">녹음</div>
             </button>
         </div>
     </div>
@@ -132,13 +153,21 @@
     console.log('role = ', role);
     if(role !== 'manager') {
         document.getElementById('toggleScreenShare').style.display = 'none';
+        // 녹화/녹음 버튼은 방장만 표시
+        document.getElementById('toggleRecordBtn').style.display = 'none';
+        document.getElementById('toggleAudioRecordBtn').style.display = 'none';
+        document.getElementById('recordingDivider').style.display = 'none';
+    } else {
+        // 방장: 녹화 상태바 표시
+        document.getElementById('recordingStatusBar').style.display = 'flex';
     }
 </script>
-<script src='/js/webrtc.js?v=20260723_9'></script>
-<script type="module" src="/js/member-panel.js?v=20260723_9" defer></script>
-<script type="module" src="/js/video-grid.js?v=20260723_9" defer></script>
-<script type="module" src="/js/screen-share.js?v=20260723_9" defer></script>
-<script src="/js/virtual-background.js?v=20260723_9" defer></script>
+<script src='/js/webrtc.js?v=20260727_1'></script>
+<script type="module" src="/js/member-panel.js?v=20260727_1" defer></script>
+<script type="module" src="/js/video-grid.js?v=20260727_1" defer></script>
+<script type="module" src="/js/screen-share.js?v=20260727_1" defer></script>
+<script src="/js/virtual-background.js?v=20260727_1" defer></script>
+<script src="/js/recording.js?v=20260727_1" defer></script>
 <!-- 배경 선택 모달 -->
 <div id="bgModal" style="display: none; position: absolute; bottom: 80px; left: 50%; transform: translateX(-50%); background: rgba(0,0,0,0.85); padding: 20px; border-radius: 15px; z-index: 101; width: 450px; box-shadow: 0 10px 25px rgba(0,0,0,0.5);">
     <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #444; padding-bottom: 10px; margin-bottom: 15px;">
