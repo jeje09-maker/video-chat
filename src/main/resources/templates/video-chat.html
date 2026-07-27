@@ -53,16 +53,16 @@
     <!-- 매니저 비디오 (왼쪽 절반) -->
     <div id="managerVideoContainer">
         <video id="managerVideo" autoplay muted></video>
-        <!-- 화면 공유 시 내 얼굴을 띄워줄 작은 비디오 요소 -->
-        <video id="localCameraVideo" autoplay muted></video>
+    </div>
 
+    <!-- 화면 공유 시 내 얼굴을 띄워줄 작은 비디오 요소 (PiP) -->
+    <video id="localCameraVideo" autoplay muted></video>
 
-
-        <!-- 녹화 상태 표시 (빨간 점 + 타이머) -->
-        <div id="recordingStatusBar" style="display:none; position:absolute; top:14px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); border-radius:20px; padding:5px 14px; z-index:200; align-items:center; gap:8px; pointer-events:none;">
-            <span id="recordingIndicator" style="display:none; width:10px; height:10px; border-radius:50%; background:#ff4757;"></span>
-            <span id="recordingTimer" style="display:none; color:#fff; font-size:13px; font-weight:600; letter-spacing:1px; font-family:monospace;">00:00</span>
-        </div>
+    <!-- 녹화 상태 표시 (빨간 점 + 타이머) -->
+    <div id="recordingStatusBar" style="display:none; position:absolute; top:14px; left:50%; transform:translateX(-50%); background:rgba(0,0,0,0.65); backdrop-filter:blur(6px); border-radius:20px; padding:5px 14px; z-index:200; align-items:center; gap:8px; pointer-events:none;">
+        <span id="recordingIndicator" style="display:none; width:10px; height:10px; border-radius:50%; background:#ff4757;"></span>
+        <span id="recordingTimer" style="display:none; color:#fff; font-size:13px; font-weight:600; letter-spacing:1px; font-family:monospace;">00:00</span>
+    </div>
 
         <!-- 메뉴바 -->
         <div id="managerMenuBar">
@@ -103,12 +103,11 @@
                 <div class="menu-btn-label">녹화</div>
             </button>
 
-            <!-- 녹음 버튼 (방장 전용) -->
-            <button id="toggleAudioRecordBtn" onclick="window.toggleAudioRecord()" title="회의 녹음 시작/중지" class="menu-btn" style="color: #ff9f43;">
-                <span class="material-symbols-outlined menu-icon" id="audioRecordIcon">mic_none</span>
-                <div class="menu-btn-label">녹음</div>
-            </button>
-        </div>
+        <!-- 녹음 버튼 (방장 전용) -->
+        <button id="toggleAudioRecordBtn" onclick="window.toggleAudioRecord()" title="회의 녹음 시작/중지" class="menu-btn" style="color: #ff9f43;">
+            <span class="material-symbols-outlined menu-icon" id="audioRecordIcon">mic_none</span>
+            <div class="menu-btn-label">녹음</div>
+        </button>
     </div>
 
     <!-- 멤버 비디오 (오른쪽 절반) -->

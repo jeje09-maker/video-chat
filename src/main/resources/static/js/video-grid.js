@@ -18,7 +18,7 @@ document.addEventListener("DOMContentLoaded", function () {
             memberVideosContainer.style.gridTemplateColumns = '';
             memberVideosContainer.style.gridTemplateRows = '';
 
-            const totalParticipants = currentSlots + 1; // 멤버들 + 방장(1명)
+            const totalParticipants = currentSlots || 1; // managerVideoContainer가 숨겨지므로 슬롯 개수 자체가 전체 인원수
             let columns = 1;
             let rows = 1;
 
