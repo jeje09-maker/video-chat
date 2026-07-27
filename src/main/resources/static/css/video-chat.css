@@ -161,9 +161,7 @@ video.memberVideo {
         bottom: calc(10px + env(safe-area-inset-bottom)); /* iPhone ë…¸ì¹˜ ëŒ€ì‘ */
         border-radius: 18px;
         padding: 8px 10px;
-        gap: 4px;
-        flex-wrap: wrap;            /* ë‘ ì¤„ë¡œ ì¤„ë°”ê¿ˆ */
-        justify-content: center;
+        gap: 2px;        flex-wrap: nowrap !important;        overflow-x: auto;        justify-content: flex-start;
         max-width: calc(100% - 12px);
         max-height: 110px;
     }
@@ -514,9 +512,7 @@ body.layout-speaker .video-wrapper {
 @media (max-width: 768px) and (orientation: portrait) {
     body.layout-speaker .video-wrapper {
         /* í•œ ì¤„ì— ì •í™•ížˆ 4ê°œê°€ ë“¤ì–´ê°€ë„ë¡ ë„ˆë¹„ ì§€ì • (gap 8px, 3ê°œì˜ gap = 24px) */
-        width: calc(25% - 6px) !important;
-        aspect-ratio: 3/4;
-        height: auto !important;
+        width: calc(25% - 6px) !important;        aspect-ratio: 3/4;        height: auto !important;        flex-shrink: 0 !important;
     }
 }
 /* ë²„íŠ¼ í˜¸ë²„ íš¨ê³¼ (ë©”ë‰´ë°” ì•„ì´ì½˜) â€” .menu-btnìœ¼ë¡œ ëŒ€ì²´ë¨, ê¸°ì¡´ ê·œì¹™ ìœ ì§€ */
@@ -539,6 +535,12 @@ body:not(.layout-speaker) #memberVideosContainer {
     gap: 0 !important;
     background-color: #000;
     position: static !important;
+}
+body:not(.layout-speaker) .video-wrapper {
+    width: 100% !important;
+    height: 100% !important;
+    aspect-ratio: unset !important;
+    flex-shrink: unset !important;
 }
 
 /* â”€â”€â”€â”€â”€ ë…¹í™” ê¸°ëŠ¥ ìŠ¤íƒ€ì¼ â”€â”€â”€â”€â”€ */
@@ -597,28 +599,28 @@ body:not(.layout-speaker) #memberVideosContainer {
         justify-content: unset !important;
         align-content: unset !important;
         
-        pointer-events: none !important; /* Å¬¸¯ Åõ°ú */
+        pointer-events: none !important; /* Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
     }
     
     body.layout-speaker .video-wrapper {
         width: 160px !important;
         height: 120px !important;
-        pointer-events: auto !important; /* ½æ³×ÀÏ Å¬¸¯ Çã¿ë */
+        pointer-events: auto !important; /* ï¿½ï¿½ï¿½ï¿½ï¿½ Å¬ï¿½ï¿½ ï¿½ï¿½ï¿½ */
     }
 
-    /* 1. ¿À¸¥ÂÊ Á¦ÀÏ ¹Ù±ùÂÊ (Column 4) -> 1~4¸í */
+    /* 1. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Ù±ï¿½ï¿½ï¿½ (Column 4) -> 1~4ï¿½ï¿½ */
     body.layout-speaker .video-wrapper:nth-child(1) { grid-column: 4; grid-row: 1; }
     body.layout-speaker .video-wrapper:nth-child(2) { grid-column: 4; grid-row: 2; }
     body.layout-speaker .video-wrapper:nth-child(3) { grid-column: 4; grid-row: 3; }
     body.layout-speaker .video-wrapper:nth-child(4) { grid-column: 4; grid-row: 4; }
 
-    /* 2. ¿À¸¥ÂÊ ¾ÈÂÊ (Column 3) -> 5~8¸í */
+    /* 2. ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ (Column 3) -> 5~8ï¿½ï¿½ */
     body.layout-speaker .video-wrapper:nth-child(5) { grid-column: 3; grid-row: 1; }
     body.layout-speaker .video-wrapper:nth-child(6) { grid-column: 3; grid-row: 2; }
     body.layout-speaker .video-wrapper:nth-child(7) { grid-column: 3; grid-row: 3; }
     body.layout-speaker .video-wrapper:nth-child(8) { grid-column: 3; grid-row: 4; }
 
-    /* 3. ¿ÞÂÊ ¹Ù±ùÂÊ (Column 1) -> 9~12¸í */
+    /* 3. ï¿½ï¿½ï¿½ï¿½ ï¿½Ù±ï¿½ï¿½ï¿½ (Column 1) -> 9~12ï¿½ï¿½ */
     body.layout-speaker .video-wrapper:nth-child(9) { grid-column: 1; grid-row: 1; }
     body.layout-speaker .video-wrapper:nth-child(10) { grid-column: 1; grid-row: 2; }
     body.layout-speaker .video-wrapper:nth-child(11) { grid-column: 1; grid-row: 3; }
@@ -627,17 +629,17 @@ body:not(.layout-speaker) #memberVideosContainer {
 
 
 @media (max-width: 950px) and (orientation: landscape) {
-    /* ¸ð¹ÙÀÏ °¡·Î È­¸é¿¡¼­ ¼¼·ÎÆø 4µîºÐ ¿©¹é */
+    /* ï¿½ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ È­ï¿½é¿¡ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ 4ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ */
     body.layout-speaker #memberVideosContainer {
         grid-template-columns: min-content 1fr min-content min-content !important;
-        /* ¼¼·Î 4µîºÐ - ¿©¹é 6px */
+        /* ï¿½ï¿½ï¿½ï¿½ 4ï¿½ï¿½ï¿½ - ï¿½ï¿½ï¿½ï¿½ 6px */
         grid-template-rows: repeat(4, calc(25% - 6px)) !important;
         gap: 8px !important;
     }
     body.layout-speaker .video-wrapper {
         height: 100% !important; 
         width: auto !important;
-        aspect-ratio: 4/3 !important; /* ¼¼·Î¿¡ ¸ÂÃç °¡·Î ÀÚµ¿ Á¶Àý */
+        aspect-ratio: 4/3 !important; /* ï¿½ï¿½ï¿½Î¿ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ ï¿½Úµï¿½ ï¿½ï¿½ï¿½ï¿½ */
     }
 }
 
