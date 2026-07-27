@@ -77,9 +77,6 @@
             <button id="toggleCameraBtn" onclick="window.toggleCamera()" title="카메라 켜기/끄기" class="menu-btn">
                 <span class="material-symbols-outlined menu-icon" id="cameraIcon">videocam</span>
             </button>
-            <button id="toggleFullscreenBtn" onclick="window.toggleFullscreen()" title="전체화면" class="menu-btn">
-                <span class="material-symbols-outlined menu-icon" id="fullscreenIcon">fullscreen</span>
-            </button>
             <button id="toggleScreenShare" title="화면 공유" class="menu-btn">
                 <span class="material-symbols-outlined menu-icon">present_to_all</span>
             </button>
@@ -169,44 +166,19 @@
         document.getElementById('recordingStatusBar').style.display = 'flex';
     }
 
-    // 전체 화면 토글 함수
-    window.toggleFullscreen = function() {
-        if (!document.fullscreenElement) {
-            document.documentElement.requestFullscreen().catch((err) => {
-                console.error("전체화면 전환 에러:", err);
-            });
-        } else {
-            if (document.exitFullscreen) {
-                document.exitFullscreen();
-            }
-        }
-    };
-
     // 우측 상단 뒤로가기(종료) 버튼 클릭 시 호출
     window.exitMode = function() {
-        // 1. 전체화면 상태면 전체화면 해제
-        if (document.fullscreenElement) {
-            document.exitFullscreen();
-        } 
-        // 2. 분할 화면(타일 모드) 상태면 발표자 모드로 복귀
-        else if (!document.body.classList.contains('layout-speaker')) {
+        // 분할 화면(타일 모드) 상태면 발표자 모드로 복귀 (이때 전체화면도 같이 해제됨)
+        if (!document.body.classList.contains('layout-speaker')) {
             if (typeof window.toggleViewMode === 'function') {
                 window.toggleViewMode();
             }
         } 
-        // 3. 둘 다 아니면 방 나가기(이전 페이지로 이동)
+        // 이미 발표자 모드라면 방 나가기(이전 페이지로 이동)
         else {
             location.href = '/'; 
         }
     };
-
-    // 전체화면 상태에 따라 아이콘 변경 (선택적)
-    document.addEventListener("fullscreenchange", function() {
-        const icon = document.getElementById('fullscreenIcon');
-        if (icon) {
-            icon.innerText = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
-        }
-    });
 </script>
 <script src='/js/webrtc.js?v=20260727_1'></script>
 <script type="module" src="/js/member-panel.js?v=20260727_1" defer></script>

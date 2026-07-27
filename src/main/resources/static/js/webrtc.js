@@ -550,7 +550,7 @@ async function handleJoinMember(sessionId) {
         event: 'join-member',
         sessionId: sessionId,
         userName: window.myUserName,
-        type: window.myType
+        type: myType
     }));
 }
 
@@ -576,7 +576,7 @@ async function createOffer(sessionId) {
             sessionId: mySessionId,
             recipientSessionId: sessionId,
             userName: window.myUserName,
-            type: window.myType
+            type: myType
         }));
 
     } catch (error) {
@@ -660,7 +660,7 @@ async function sendAnswer(sessionId, answer) {
         sessionId: mySessionId,
         recipientSessionId: sessionId,
         userName: window.myUserName,
-        type: window.myType
+        type: myType
     }));
 }
 
@@ -953,13 +953,30 @@ window.toggleViewMode = function() {
     if (isSpeaker) {
         document.body.classList.remove('layout-speaker');
         panel.classList.remove('show');
-        if (icon) icon.innerText = 'fullscreen';
+        if (icon) {
+            icon.innerText = 'fullscreen_exit';
+            icon.parentElement.title = "발표자 화면으로 복귀";
+        }
+        
+        // 타일 모드(분할화면) 진입 시 전체 화면 모드로 동시 진입 (브라우저 주소창 등 숨김)
+        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+
         setTimeout(() => {
             if (typeof window.updateGrid === 'function') window.updateGrid();
         }, 100);
     } else {
         document.body.classList.add('layout-speaker');
-        if (icon) icon.innerText = 'grid_view';
+        if (icon) {
+            icon.innerText = 'grid_view';
+            icon.parentElement.title = "전체화면(타일) 보기 전환";
+        }
+
+        // 발표자 화면 복귀 시 전체 화면 모드 해제
+        if (document.fullscreenElement && document.exitFullscreen) {
+            document.exitFullscreen().catch(() => {});
+        }
     }
 };
 
