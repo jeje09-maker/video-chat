@@ -170,6 +170,35 @@ video.memberVideo {
     .menu-divider {
         display: none;              /* 구분선 숨겨서 공간 절약 */
     }
+
+    /* ── 세로 화면 발표자 모드 (작은 썸네일 레이아웃 덮어쓰기) ── */
+    body.layout-speaker #videoContainer {
+        flex-direction: column;
+    }
+    body.layout-speaker #managerVideoContainer {
+        width: 100% !important;
+        height: 50% !important; /* 메인 비디오는 상단 절반 */
+    }
+    body.layout-speaker #memberVideosContainer {
+        width: 100% !important;
+        height: 50% !important;
+        position: relative !important; /* 겹치지 않게 */
+        top: 0 !important;
+        left: 0 !important;
+        right: 0 !important;
+        padding: 10px;
+        box-sizing: border-box;
+        flex-direction: row !important; /* 상단부터 가로로 배치 */
+        flex-wrap: wrap !important;
+        align-content: flex-start !important;
+        justify-content: flex-start !important;
+        gap: 5px !important;
+    }
+    body.layout-speaker .video-wrapper {
+        width: calc(33.333% - 4px) !important; /* 한 줄에 3명씩 */
+        height: auto !important;
+        aspect-ratio: 16 / 9; /* 세로 화면에서도 잘리지 않도록 고정 비율 */
+    }
 }
 
 /* ── 모바일 가로 (landscape, 높이가 낮음) ── */

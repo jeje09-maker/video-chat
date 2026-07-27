@@ -22,21 +22,29 @@ document.addEventListener("DOMContentLoaded", function () {
             let columns = 1;
             let rows = 1;
 
-            if (totalParticipants === 1) { columns = 1; rows = 1; }
-            else if (totalParticipants === 2) {
-                if (window.innerHeight > window.innerWidth) {
-                    columns = 1; rows = 2;
-                } else {
-                    columns = 2; rows = 1;
-                }
-            }
-            else if (totalParticipants === 3 || totalParticipants === 4) { columns = 2; rows = 2; }
-            else if (totalParticipants === 5 || totalParticipants === 6) { columns = 3; rows = 2; }
-            else if (totalParticipants >= 7 && totalParticipants <= 9) { columns = 3; rows = 3; }
-            else { columns = 4; rows = 3; } // 10명 이상
+            const isPortrait = window.innerHeight > window.innerWidth;
 
-            videoContainer.style.gridTemplateColumns = `repeat(${columns}, 1fr)`;
-            videoContainer.style.gridTemplateRows = `repeat(${rows}, 1fr)`;
+            if (isPortrait) {
+                // 스마트폰 등 세로 화면 모드
+                if (totalParticipants === 1) { columns = 1; rows = 1; }
+                else if (totalParticipants === 2) { columns = 1; rows = 2; }
+                else if (totalParticipants === 3) { columns = 1; rows = 3; }
+                else if (totalParticipants === 4) { columns = 1; rows = 4; }
+                else if (totalParticipants === 5 || totalParticipants === 6) { columns = 2; rows = 3; }
+                else if (totalParticipants === 7 || totalParticipants === 8) { columns = 2; rows = 4; }
+                else { columns = 2; rows = 5; } // 9명 이상 (최대 10명 기준)
+            } else {
+                // 가로 화면 모드
+                if (totalParticipants === 1) { columns = 1; rows = 1; }
+                else if (totalParticipants === 2) { columns = 2; rows = 1; }
+                else if (totalParticipants === 3 || totalParticipants === 4) { columns = 2; rows = 2; }
+                else if (totalParticipants === 5 || totalParticipants === 6) { columns = 3; rows = 2; }
+                else if (totalParticipants >= 7 && totalParticipants <= 9) { columns = 3; rows = 3; }
+                else { columns = 4; rows = 3; } // 10명 이상
+            }
+
+            videoContainer.style.gridTemplateColumns = `repeat(${columns}, minmax(0, 1fr))`;
+            videoContainer.style.gridTemplateRows = `repeat(${rows}, minmax(0, 1fr))`;
         }
     }
 
