@@ -316,6 +316,24 @@ function selectMainVideo(sessionId, stream) {
                 managerVideo.muted = false;
             }
             managerVideo.play().catch(() => {});
+            
+            // 메인 비디오 라벨 업데이트
+            const managerLabel = document.getElementById('managerLabel');
+            const managerName = document.getElementById('managerName');
+            const managerMic = document.getElementById('managerMic');
+            if (managerLabel && managerName) {
+                managerLabel.style.display = 'flex';
+                managerLabel.style.alignItems = 'center';
+                managerLabel.style.gap = '6px';
+                managerLabel.style.borderRadius = '20px';
+                managerName.innerText = getDisplayName(sessionId);
+                // 마이크 상태 동기화 (해당 유저의 mic 아이콘 상태를 복사)
+                const micIcon = document.getElementById('mic-icon-' + sessionId);
+                if (micIcon && managerMic) {
+                    managerMic.innerText = micIcon.innerText;
+                    managerMic.style.color = micIcon.style.color || '#fff';
+                }
+            }
         }
     }
 }
@@ -341,12 +359,25 @@ function addMemberVideo(sessionId, stream) {
     }
 
     // 항상 새로운 `label`을 생성하여 추가
-    const label = document.createElement("span");
+    const label = document.createElement("div");
     label.classList.add("video-label");
     label.id = "label-" + sessionId;
-    label.innerText = getDisplayName(sessionId);
     label.style.cursor = "pointer";
     label.title = "이름 변경하기";
+    
+    const nameSpan = document.createElement("span");
+    nameSpan.id = "name-" + sessionId;
+    nameSpan.innerText = getDisplayName(sessionId);
+    
+    const micIcon = document.createElement("span");
+    micIcon.classList.add("material-symbols-outlined");
+    micIcon.id = "mic-icon-" + sessionId;
+    micIcon.innerText = "mic";
+    micIcon.style.fontSize = "16px";
+    
+    label.appendChild(nameSpan);
+    label.appendChild(micIcon);
+
     label.addEventListener("click", (e) => {
         e.stopPropagation();
         promptChangeName(sessionId);
@@ -844,9 +875,9 @@ function getDisplayName(sessionId) {
 }
 
 function updateVideoLabel(sessionId) {
-    const label = document.getElementById("label-" + sessionId);
-    if (label) {
-        label.innerText = getDisplayName(sessionId);
+    const nameSpan = document.getElementById("name-" + sessionId);
+    if (nameSpan) {
+        nameSpan.innerText = getDisplayName(sessionId);
     }
 }
 window.updateVideoLabel = updateVideoLabel;
@@ -947,38 +978,56 @@ function appendChatMessage(sender, msg, isMe) {
 // ---------------------- 뷰 모드 및 패널 토글 기능 ----------------------
 window.toggleViewMode = function() {
     const isSpeaker = document.body.classList.contains('layout-speaker');
+    const isFullscreen = !!document.fullscreenElement;
     const icon = document.getElementById('viewIcon');
     const panel = document.getElementById('memberVideosContainer');
     
-    if (isSpeaker) {
+    if (isSpeaker && !isFullscreen) {
+        // Step 1: 전체화면 스피커 모드로 진입 (전체화면 탭 누름)
+        if (document.documentElement.requestFullscreen) {
+            document.documentElement.requestFullscreen().catch(() => {});
+        }
+        if (icon) {
+            icon.innerText = 'grid_view';
+            icon.parentElement.title = "분할화면 보기";
+        }
+    } else if (isSpeaker && isFullscreen) {
+        // Step 2: 분할화면 모드로 진입 (분할화면 아이콘 누름)
         document.body.classList.remove('layout-speaker');
         panel.classList.remove('show');
         if (icon) {
             icon.innerText = 'fullscreen_exit';
-            icon.parentElement.title = "발표자 화면으로 복귀";
+            icon.parentElement.title = "처음 화면으로 복귀";
         }
         
-        // 타일 모드(분할화면) 진입 시 전체 화면 모드로 동시 진입 (브라우저 주소창 등 숨김)
-        if (!document.fullscreenElement && document.documentElement.requestFullscreen) {
-            document.documentElement.requestFullscreen().catch(() => {});
-        }
-
         setTimeout(() => {
             if (typeof window.updateGrid === 'function') window.updateGrid();
         }, 100);
     } else {
+        // Step 3: 초기 화면으로 복귀 (주소창 있는 화면)
         document.body.classList.add('layout-speaker');
-        if (icon) {
-            icon.innerText = 'grid_view';
-            icon.parentElement.title = "전체화면(타일) 보기 전환";
-        }
-
-        // 발표자 화면 복귀 시 전체 화면 모드 해제
         if (document.fullscreenElement && document.exitFullscreen) {
             document.exitFullscreen().catch(() => {});
         }
+        if (icon) {
+            icon.innerText = 'fullscreen';
+            icon.parentElement.title = "전체화면 보기";
+        }
     }
 };
+
+// 사용자가 ESC키를 눌러 전체화면을 빠져나왔을 때 상태를 동기화하기 위한 이벤트 리스너
+document.addEventListener('fullscreenchange', () => {
+    if (!document.fullscreenElement) {
+        // 전체화면이 해제되면 무조건 초기 상태로 복구
+        document.body.classList.add('layout-speaker');
+        const icon = document.getElementById('viewIcon');
+        if (icon) {
+            icon.innerText = 'fullscreen';
+            icon.parentElement.title = "전체화면 보기";
+        }
+    }
+});
 
 window.toggleMemberVideoPanel = function() {
     // 이 기능은 발표자 모드(layout-speaker)일 때만 유효함
