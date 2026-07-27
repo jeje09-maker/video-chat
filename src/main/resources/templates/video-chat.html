@@ -64,6 +64,11 @@
         <span id="recordingTimer" style="display:none; color:#fff; font-size:13px; font-weight:600; letter-spacing:1px; font-family:monospace;">00:00</span>
     </div>
 
+    <!-- 우측 상단 뒤로가기/종료 버튼 -->
+    <button id="exitModeBtn" onclick="window.exitMode()" title="전체화면/분할화면 종료" style="position: absolute; top: 15px; right: 15px; background: rgba(0,0,0,0.4); backdrop-filter: blur(4px); border: none; border-radius: 50%; width: 40px; height: 40px; display: flex; align-items: center; justify-content: center; color: white; cursor: pointer; z-index: 100; transition: background 0.2s;">
+        <span class="material-symbols-outlined" style="font-size: 24px;">arrow_back</span>
+    </button>
+
         <!-- 메뉴바 -->
         <div id="managerMenuBar">
             <button id="toggleAudioBtn" onclick="window.toggleAudio()" title="마이크 켜기/끄기" class="menu-btn">
@@ -71,6 +76,9 @@
             </button>
             <button id="toggleCameraBtn" onclick="window.toggleCamera()" title="카메라 켜기/끄기" class="menu-btn">
                 <span class="material-symbols-outlined menu-icon" id="cameraIcon">videocam</span>
+            </button>
+            <button id="toggleFullscreenBtn" onclick="window.toggleFullscreen()" title="전체화면" class="menu-btn">
+                <span class="material-symbols-outlined menu-icon" id="fullscreenIcon">fullscreen</span>
             </button>
             <button id="toggleScreenShare" title="화면 공유" class="menu-btn">
                 <span class="material-symbols-outlined menu-icon">present_to_all</span>
@@ -160,6 +168,45 @@
         // 방장: 녹화 상태바 표시
         document.getElementById('recordingStatusBar').style.display = 'flex';
     }
+
+    // 전체 화면 토글 함수
+    window.toggleFullscreen = function() {
+        if (!document.fullscreenElement) {
+            document.documentElement.requestFullscreen().catch((err) => {
+                console.error("전체화면 전환 에러:", err);
+            });
+        } else {
+            if (document.exitFullscreen) {
+                document.exitFullscreen();
+            }
+        }
+    };
+
+    // 우측 상단 뒤로가기(종료) 버튼 클릭 시 호출
+    window.exitMode = function() {
+        // 1. 전체화면 상태면 전체화면 해제
+        if (document.fullscreenElement) {
+            document.exitFullscreen();
+        } 
+        // 2. 분할 화면(타일 모드) 상태면 발표자 모드로 복귀
+        else if (!document.body.classList.contains('layout-speaker')) {
+            if (typeof window.toggleViewMode === 'function') {
+                window.toggleViewMode();
+            }
+        } 
+        // 3. 둘 다 아니면 방 나가기(이전 페이지로 이동)
+        else {
+            location.href = '/'; 
+        }
+    };
+
+    // 전체화면 상태에 따라 아이콘 변경 (선택적)
+    document.addEventListener("fullscreenchange", function() {
+        const icon = document.getElementById('fullscreenIcon');
+        if (icon) {
+            icon.innerText = document.fullscreenElement ? 'fullscreen_exit' : 'fullscreen';
+        }
+    });
 </script>
 <script src='/js/webrtc.js?v=20260727_1'></script>
 <script type="module" src="/js/member-panel.js?v=20260727_1" defer></script>
