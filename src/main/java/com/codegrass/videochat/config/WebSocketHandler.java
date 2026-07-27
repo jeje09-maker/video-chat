@@ -403,6 +403,9 @@ public class WebSocketHandler extends TextWebSocketHandler {
         URI uri = session.getUri();
         if (uri != null) {
             String path = uri.getPath();
+            if (path.endsWith("/")) {
+                path = path.substring(0, path.length() - 1);
+            }
             return path.substring(path.lastIndexOf("/") + 1);
         }
         throw new IllegalStateException("URI 에서 type 추출 실패 : session.getUri() is null");

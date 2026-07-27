@@ -625,3 +625,19 @@ body:not(.layout-speaker) #memberVideosContainer {
     body.layout-speaker .video-wrapper:nth-child(12) { grid-column: 1; grid-row: 4; }
 }
 
+
+@media (max-width: 950px) and (orientation: landscape) {
+    /* 모바일 가로 화면에서 세로폭 4등분 여백 */
+    body.layout-speaker #memberVideosContainer {
+        grid-template-columns: min-content 1fr min-content min-content !important;
+        /* 세로 4등분 - 여백 6px */
+        grid-template-rows: repeat(4, calc(25% - 6px)) !important;
+        gap: 8px !important;
+    }
+    body.layout-speaker .video-wrapper {
+        height: 100% !important; 
+        width: auto !important;
+        aspect-ratio: 4/3 !important; /* 세로에 맞춰 가로 자동 조절 */
+    }
+}
+
