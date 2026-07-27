@@ -23,15 +23,16 @@ body {
     position: relative; /* 자식 absolute(메뉴바 등) 기준점 */
 }
 
-/* 매니저 비디오 영역 (왼쪽 차지) */
+/* 매니저 비디오 영역 (전체 화면 차지) */
 #managerVideoContainer {
-    width: 70%;
+    width: 100%;
     height: 100%;
     display: flex;
     justify-content: center;
     align-items: center;
-    background-color: black;
-    position: relative;
+    background-color: transparent; /* 배경 제거 */
+    position: absolute;
+    top: 0; left: 0;
     transition: width 0.4s ease, height 0.4s ease;
 }
 
@@ -44,18 +45,24 @@ body {
     transition: all 0.5s ease-in-out; /* 부드러운 크기 & 위치 변경 */
 }
 
-/* 멤버 비디오 영역 (오른쪽 차지, 그리드 형태) */
+/* 멤버 비디오 영역 (오른쪽 오버레이, 유동적 확장) */
 #memberVideosContainer {
-    width: 30%;
-    height: 100%;
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    grid-template-rows: repeat(4, 1fr);
-    gap: 8px;
-    padding: 12px;
-    background-color: #121212;
-    overflow: hidden;
-    box-sizing: border-box;
+    position: absolute;
+    right: 20px;
+    bottom: 80px; /* 메뉴바 위로 띄움 */
+    top: 20px;
+    width: auto;
+    max-width: 50%;
+    display: flex;
+    flex-direction: column; /* 세로로 나열 */
+    flex-wrap: wrap; /* 다 차면 왼쪽으로 새로운 열 생성 */
+    align-content: flex-end; /* 오른쪽부터 채움 */
+    gap: 12px;
+    padding: 0;
+    background-color: transparent; /* 배경 제거 */
+    overflow: visible;
+    pointer-events: none; /* 빈 공간 클릭 통과 */
+    z-index: 50;
 }
 
 /* 개별 멤버 비디오 스타일 */
@@ -179,17 +186,23 @@ video.memberVideo {
     }
     body.layout-speaker #managerVideoContainer {
         width: 100% !important;
-        height: 60% !important; /* 메인 비디오 상단 60% */
+        height: 100% !important; 
     }
     body.layout-speaker #memberVideosContainer {
-        width: 100% !important;
-        height: 40% !important;
-        position: static !important;
-        padding: 10px;
-        box-sizing: border-box;
-        display: grid !important;
-        grid-template-columns: repeat(4, 1fr) !important;
-        grid-template-rows: repeat(3, 1fr) !important;
+        width: auto !important;
+        height: auto !important;
+        max-height: 50% !important;
+        position: absolute !important;
+        top: auto !important;
+        bottom: 80px !important;
+        left: 10px !important;
+        right: 10px !important;
+        padding: 0;
+        display: flex !important;
+        flex-direction: row !important;
+        flex-wrap: wrap-reverse !important; /* 아래부터 차곡차곡 위로 */
+        justify-content: center !important;
+        align-content: flex-end !important;
         gap: 8px !important;
     }
 }
@@ -493,6 +506,17 @@ video.memberVideo {
     box-shadow: 0 0 4px rgba(239,68,68,0.7);
 }
 
+/* ── 스피커 모드에서 오버레이 썸네일 크기 제한 ── */
+body.layout-speaker .video-wrapper {
+    width: 160px;
+    height: 120px;
+}
+@media (max-width: 600px) and (orientation: portrait) {
+    body.layout-speaker .video-wrapper {
+        width: 100px;
+        height: 130px; /* 3:4 비율에 가깝게 */
+    }
+}
 /* 버튼 호버 효과 (메뉴바 아이콘) — .menu-btn으로 대체됨, 기존 규칙 유지 */
 #managerMenuBar button:hover {
     opacity: 0.75;

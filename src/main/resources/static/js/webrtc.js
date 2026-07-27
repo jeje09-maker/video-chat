@@ -309,12 +309,8 @@ function selectMainVideo(sessionId, stream) {
         const managerVideo = document.getElementById('managerVideo');
         if (managerVideo) {
             managerVideo.srcObject = stream;
-            // 내 화면을 보면 muted true, 남의 화면이면 false (다만 WebRTC에서 받은 stream에 오디오가 있을 수 있음)
-            if (stream === window.localStream) {
-                managerVideo.muted = true;
-            } else {
-                managerVideo.muted = false;
-            }
+            // 브라우저 자동 재생 정책 우회 및 오디오 중복 재생 방지 (오디오는 원격 Audio 객체에서 재생됨)
+            managerVideo.muted = true;
             managerVideo.play().catch(() => {});
             
             // 메인 비디오 라벨 업데이트
@@ -353,10 +349,10 @@ function addMemberVideo(sessionId, stream) {
     const { videoWrapper, videoElement } = window.createVideoSlot(sessionId);
     videoElement.srcObject = stream;
 
-    // 내(로컬) 스트림일 경우 하울링 방지 및 브라우저 자동 재생 정책을 위해 음소거
-    if (stream === window.localStream) {
-        videoElement.muted = true;
-    }
+    // 브라우저 자동 재생 정책(Autoplay Policy) 우회를 위해 무조건 비디오 요소는 음소거합니다.
+    // 상대방의 실제 오디오는 `remote-audio-xxx`라는 별도 Audio 객체에서 재생되므로 문제가 없습니다.
+    videoElement.muted = true;
+    videoElement.play().catch(e => console.warn('[addMemberVideo] play() 실패:', e));
 
     // 항상 새로운 `label`을 생성하여 추가
     const label = document.createElement("div");
