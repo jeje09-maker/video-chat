@@ -35,16 +35,165 @@ const emailActionBtn = document.getElementById('email-action-btn');
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' | 'signup'
 
-// 모달 제어
-function openModal(mode = 'login') {
-    authModal.classList.remove('hidden');
-    switchAuthTab(mode);
-}
-function closeModal() { authModal.classList.add('hidden'); }
+let currentUser = null;
+let currentAuthMode = 'login'; // 'login' | 'signup'
 
-closeModalBtn.addEventListener('click', closeModal);
-if(navLoginBtn) navLoginBtn.addEventListener('click', () => openModal('login'));
-if(navSignupBtn) navSignupBtn.addEventListener('click', () => openModal('signup'));
+document.addEventListener('DOMContentLoaded', () => {
+    // 모달 제어
+    function openModal(mode = 'login') {
+        authModal.classList.remove('hidden');
+        switchAuthTab(mode);
+    }
+    function closeModal() { authModal.classList.add('hidden'); }
+
+    if(closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
+    if(navLoginBtn) navLoginBtn.addEventListener('click', () => openModal('login'));
+    if(navSignupBtn) navSignupBtn.addEventListener('click', () => openModal('signup'));
+    
+    // Auth 탭 전환 로직
+    function switchAuthTab(mode) {
+        currentAuthMode = mode;
+        if(authError) authError.classList.add('hidden');
+        
+        if (mode === 'login') {
+            if(authTabLogin) authTabLogin.classList.add('active');
+            if(authTabSignup) authTabSignup.classList.remove('active');
+            if(pwdConfirmInput) pwdConfirmInput.classList.add('hidden');
+            if(emailActionBtn) emailActionBtn.textContent = '로그인';
+        } else {
+            if(authTabSignup) authTabSignup.classList.add('active');
+            if(authTabLogin) authTabLogin.classList.remove('active');
+            if(pwdConfirmInput) pwdConfirmInput.classList.remove('hidden');
+            if(emailActionBtn) emailActionBtn.textContent = '회원가입';
+        }
+    }
+    if(authTabLogin) authTabLogin.addEventListener('click', () => switchAuthTab('login'));
+    if(authTabSignup) authTabSignup.addEventListener('click', () => switchAuthTab('signup'));
+
+    // 방 만들기 탭 접근 제어
+    if(tabCreate) {
+        tabCreate.addEventListener('click', (e) => {
+            if (!currentUser) {
+                e.preventDefault();
+                openModal('signup');
+            }
+        });
+    }
+    if(tabSchedule) {
+        tabSchedule.addEventListener('click', (e) => {
+            if (!currentUser) {
+                e.preventDefault();
+                openModal('login');
+            }
+        });
+    }
+
+    // 이메일 액션 (로그인/가입)
+    if(emailActionBtn) {
+        emailActionBtn.addEventListener('click', async () => {
+            const email = document.getElementById('email-input').value;
+            const password = document.getElementById('password-input').value;
+            const passwordConfirm = pwdConfirmInput ? pwdConfirmInput.value : '';
+            
+            if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
+            
+            if (currentAuthMode === 'signup') {
+                if (password !== passwordConfirm) return showError('비밀번호가 일치하지 않습니다.');
+                
+                const { data, error } = await supabase.auth.signUp({ 
+                    email, 
+                    password,
+                    options: {
+                        data: { mic: true, video: true, bg: 'none', room_count: 0 } // 초기 세팅
+                    }
+                });
+                
+                if (error) {
+                    showError(error.message);
+                } else {
+                    showError('가입이 완료되었습니다!', true);
+                    setTimeout(() => switchAuthTab('login'), 1500);
+                }
+            } else {
+                // 로그인
+                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                if (error) showError(error.message);
+            }
+        });
+    }
+
+    // 소셜 로그인 공통 함수
+    async function signInWithProvider(provider) {
+        const { data, error } = await supabase.auth.signInWithOAuth({ provider: provider });
+        if (error) showError(error.message);
+    }
+
+    const googleBtn = document.getElementById('google-login-btn');
+    const kakaoBtn = document.getElementById('kakao-login-btn');
+    if(googleBtn) googleBtn.addEventListener('click', () => signInWithProvider('google'));
+    if(kakaoBtn) kakaoBtn.addEventListener('click', () => signInWithProvider('kakao'));
+
+    // 로그아웃
+    const logoutBtn = document.getElementById('logout-btn');
+    if(logoutBtn) {
+        logoutBtn.addEventListener('click', async () => {
+            await supabase.auth.signOut();
+        });
+    }
+
+    // ----------------------------------------
+    // 마이페이지 (user_metadata)
+    // ----------------------------------------
+    if(mypageTrigger) {
+        mypageTrigger.addEventListener('click', async () => {
+            if (!currentUser) return;
+            
+            const meta = currentUser.user_metadata || {};
+            const roomCount = meta.room_count || 0;
+            
+            if(mypageRoomCount) mypageRoomCount.textContent = `${roomCount}회`;
+            if(mypageMicToggle) mypageMicToggle.checked = meta.mic !== false;
+            if(mypageVideoToggle) mypageVideoToggle.checked = meta.video !== false;
+            if(mypageBgSelect) mypageBgSelect.value = meta.bg || 'none';
+            
+            if(mypageMessage) mypageMessage.classList.add('hidden');
+            if(mypageModal) mypageModal.classList.remove('hidden');
+        });
+    }
+
+    if(closeMypageBtn) {
+        closeMypageBtn.addEventListener('click', () => {
+            if(mypageModal) mypageModal.classList.add('hidden');
+        });
+    }
+
+    if(mypageSaveBtn) {
+        mypageSaveBtn.addEventListener('click', async () => {
+            const mic = mypageMicToggle ? mypageMicToggle.checked : true;
+            const video = mypageVideoToggle ? mypageVideoToggle.checked : true;
+            const bg = mypageBgSelect ? mypageBgSelect.value : 'none';
+            
+            const { data, error } = await supabase.auth.updateUser({
+                data: { mic: mic, video: video, bg: bg }
+            });
+            
+            if (error) {
+                if(mypageMessage) {
+                    mypageMessage.textContent = error.message;
+                    mypageMessage.style.color = 'var(--error-color)';
+                }
+            } else {
+                currentUser = data.user;
+                if(mypageMessage) {
+                    mypageMessage.textContent = '설정이 저장되었습니다.';
+                    mypageMessage.style.color = 'var(--success-color)';
+                }
+                setTimeout(() => { if(mypageModal) mypageModal.classList.add('hidden'); }, 1000);
+            }
+            if(mypageMessage) mypageMessage.classList.remove('hidden');
+        });
+    }
+});
 
 // Auth 탭 전환 로직
 function switchAuthTab(mode) {
@@ -96,14 +245,14 @@ function updateUI(user) {
     currentUser = user;
     if (user) {
         if(guestActions) guestActions.classList.add('hidden');
-        userProfile.classList.remove('hidden');
+        if(userProfile) userProfile.classList.remove('hidden');
         
         const name = user.user_metadata?.name || user.email.split('@')[0];
-        userNameEl.textContent = name;
-        closeModal();
+        if(userNameEl) userNameEl.textContent = name;
+        if(authModal) authModal.classList.add('hidden');
     } else {
         if(guestActions) guestActions.classList.remove('hidden');
-        userProfile.classList.add('hidden');
+        if(userProfile) userProfile.classList.add('hidden');
     }
 }
 
@@ -117,99 +266,6 @@ async function checkSession() {
         updateUI(session?.user);
     });
 }
-
-// 이메일 액션 (로그인/가입)
-emailActionBtn.addEventListener('click', async () => {
-    const email = document.getElementById('email-input').value;
-    const password = document.getElementById('password-input').value;
-    const passwordConfirm = pwdConfirmInput.value;
-    
-    if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
-    
-    if (currentAuthMode === 'signup') {
-        if (password !== passwordConfirm) return showError('비밀번호가 일치하지 않습니다.');
-        
-        const { data, error } = await supabase.auth.signUp({ 
-            email, 
-            password,
-            options: {
-                data: { mic: true, video: true, bg: 'none', room_count: 0 } // 초기 세팅
-            }
-        });
-        
-        if (error) {
-            showError(error.message);
-        } else {
-            showError('가입이 완료되었습니다!', true);
-            setTimeout(() => switchAuthTab('login'), 1500);
-        }
-    } else {
-        // 로그인
-        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-        if (error) showError(error.message);
-    }
-});
-
-// 소셜 로그인 공통 함수
-async function signInWithProvider(provider) {
-    const { data, error } = await supabase.auth.signInWithOAuth({ provider: provider });
-    if (error) showError(error.message);
-}
-
-document.getElementById('google-login-btn').addEventListener('click', () => signInWithProvider('google'));
-document.getElementById('kakao-login-btn').addEventListener('click', () => signInWithProvider('kakao'));
-
-// 로그아웃
-document.getElementById('logout-btn').addEventListener('click', async () => {
-    await supabase.auth.signOut();
-});
-
-// ----------------------------------------
-// 마이페이지 (user_metadata)
-// ----------------------------------------
-if(mypageTrigger) {
-    mypageTrigger.addEventListener('click', async () => {
-        if (!currentUser) return;
-        
-        // 데이터 로드
-        const meta = currentUser.user_metadata || {};
-        const roomCount = meta.room_count || 0;
-        
-        // UI 반영
-        mypageRoomCount.textContent = `${roomCount}회`;
-        mypageMicToggle.checked = meta.mic !== false;
-        mypageVideoToggle.checked = meta.video !== false;
-        mypageBgSelect.value = meta.bg || 'none';
-        
-        mypageMessage.classList.add('hidden');
-        mypageModal.classList.remove('hidden');
-    });
-}
-
-closeMypageBtn.addEventListener('click', () => {
-    mypageModal.classList.add('hidden');
-});
-
-mypageSaveBtn.addEventListener('click', async () => {
-    const mic = mypageMicToggle.checked;
-    const video = mypageVideoToggle.checked;
-    const bg = mypageBgSelect.value;
-    
-    const { data, error } = await supabase.auth.updateUser({
-        data: { mic: mic, video: video, bg: bg }
-    });
-    
-    if (error) {
-        mypageMessage.textContent = error.message;
-        mypageMessage.style.color = 'var(--error-color)';
-    } else {
-        currentUser = data.user;
-        mypageMessage.textContent = '설정이 저장되었습니다.';
-        mypageMessage.style.color = 'var(--success-color)';
-        setTimeout(() => mypageModal.classList.add('hidden'), 1000);
-    }
-    mypageMessage.classList.remove('hidden');
-});
 
 // 마이페이지에서 설정된 값을 index.js에서 활용할 수 있도록 노출
 window.getUserSettings = function() {
