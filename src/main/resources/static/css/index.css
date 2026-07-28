@@ -123,8 +123,8 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     display: flex;
     align-items: center;
     justify-content: space-between;
-    padding: 100px 10%;
-    gap: 50px;
+    padding: 120px 5%;
+    gap: 30px;
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/images/hero-bg.png') no-repeat center center/cover;
 }
 @media(max-width: 900px) {
@@ -133,7 +133,7 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     .hero-action-panel { width: 100%; max-width: 480px; }
 }
 
-.hero-content { flex: 1; color: white; }
+.hero-content { flex: 1; color: white; max-width: 500px; }
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
@@ -165,7 +165,7 @@ body.dark-mode .hero-subtitle { color: rgba(255, 255, 255, 0.9); }
 body.dark-mode .badge { background: rgba(129, 140, 248, 0.2); color: #818cf8; }
 
 /* Action Panel (Glass Card) */
-.hero-action-panel { flex: 0.8; max-width: 450px; width: 100%; }
+.hero-action-panel { flex: 0.8; max-width: 420px; width: 100%; }
 .glass-card {
     background: var(--card-bg-light);
     backdrop-filter: blur(20px);
@@ -286,7 +286,8 @@ body.dark-mode .features-section { background: rgba(0,0,0,0.2); }
 }
 .feature-card {
     background: var(--card-bg-light);
-    padding: 40px 20px;
+    padding: 0;
+    overflow: hidden;
     border-radius: 20px;
     border: 1px solid var(--border-light);
     box-shadow: var(--shadow-light);
@@ -294,11 +295,11 @@ body.dark-mode .features-section { background: rgba(0,0,0,0.2); }
 }
 body.dark-mode .feature-card { background: var(--card-bg-dark); border-color: var(--border-dark); box-shadow: var(--shadow-dark); }
 .feature-card:hover { transform: translateY(-10px); }
-.feature-img { width: 100px; height: 100px; object-fit: cover; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
-.feature-icon { font-size: 3rem; margin-bottom: 20px; }
-.feature-card h3 { font-size: 1.2rem; margin-bottom: 15px; }
-.feature-card p { color: var(--text-sub-light); line-height: 1.6; }
-body.dark-mode .feature-card p { color: var(--text-sub-dark); }
+.feature-img { width: 100%; height: 220px; object-fit: cover; margin-bottom: 0; display: block; border-radius: 20px 20px 0 0; }
+.feature-content { padding: 30px 20px; }
+.feature-content h3 { font-size: 1.3rem; margin-bottom: 15px; }
+.feature-content p { color: var(--text-sub-light); line-height: 1.6; }
+body.dark-mode .feature-content p { color: var(--text-sub-dark); }
 
 /* Footer */
 .footer { padding: 40px; text-align: center; color: var(--text-sub-light); font-size: 0.9rem; }
