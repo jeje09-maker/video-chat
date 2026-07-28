@@ -977,14 +977,15 @@ function appendChatMessage(sender, msg, isMe) {
 }
 
 // ---------------------- 뷰 모드 및 패널 토글 기능 ----------------------
+window.viewModeStep = window.viewModeStep || 0;
 window.toggleViewMode = function() {
     const isSpeaker = document.body.classList.contains('layout-speaker');
-    const isFullscreen = !!document.fullscreenElement;
     const icon = document.getElementById('viewIcon');
     const panel = document.getElementById('memberVideosContainer');
     
-    if (isSpeaker && !isFullscreen) {
+    if (isSpeaker && window.viewModeStep === 0) {
         // Step 1: 전체화면 스피커 모드로 진입 (전체화면 탭 누름)
+        window.viewModeStep = 1;
         if (document.documentElement.requestFullscreen) {
             document.documentElement.requestFullscreen().catch(() => {});
         }
@@ -992,8 +993,9 @@ window.toggleViewMode = function() {
             icon.innerText = 'grid_view';
             icon.parentElement.title = "분할화면 보기";
         }
-    } else if (isSpeaker && isFullscreen) {
+    } else if (isSpeaker && window.viewModeStep === 1) {
         // Step 2: 분할화면 모드로 진입 (분할화면 아이콘 누름)
+        window.viewModeStep = 2;
         document.body.classList.remove('layout-speaker');
         panel.classList.remove('show');
         if (icon) {
@@ -1006,6 +1008,7 @@ window.toggleViewMode = function() {
         }, 100);
     } else {
         // Step 3: 초기 화면으로 복귀 (주소창 있는 화면)
+        window.viewModeStep = 0;
         document.body.classList.add('layout-speaker');
         if (document.fullscreenElement && document.exitFullscreen) {
             document.exitFullscreen().catch(() => {});
@@ -1022,6 +1025,7 @@ document.addEventListener('fullscreenchange', () => {
     if (!document.fullscreenElement) {
         // 전체화면이 해제되면 무조건 초기 상태로 복구
         document.body.classList.add('layout-speaker');
+        window.viewModeStep = 0;
         const icon = document.getElementById('viewIcon');
         if (icon) {
             icon.innerText = 'fullscreen';
