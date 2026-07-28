@@ -789,8 +789,8 @@ body:not(.layout-speaker) .video-wrapper {
         max-width: none !important;
         
         display: grid !important;
-        grid-template-columns: 160px 1fr 160px 160px !important;
-        grid-template-rows: repeat(4, 120px) !important;
+        grid-template-columns: 192px 1fr 192px 192px !important;
+        grid-template-rows: repeat(4, 144px) !important;
         gap: 10px !important;
         
         flex-direction: unset !important;
@@ -802,8 +802,8 @@ body:not(.layout-speaker) .video-wrapper {
     }
     
     body.layout-speaker .video-wrapper {
-        width: 160px !important;
-        height: 120px !important;
+        width: 192px !important;
+        height: 144px !important;
         pointer-events: auto !important; /* ����� Ŭ�� ��� */
     }
 
@@ -832,13 +832,20 @@ body:not(.layout-speaker) .video-wrapper {
     body.layout-speaker #memberVideosContainer {
         grid-template-columns: min-content 1fr min-content min-content !important;
         /* ���� 4��� - ���� 6px */
-        grid-template-rows: repeat(4, calc(25% - 6px)) !important;
+        grid-template-rows: repeat(4, 80px) !important;
         gap: 8px !important;
     }
     body.layout-speaker .video-wrapper {
-        height: 100% !important; 
-        width: auto !important;
-        aspect-ratio: 4/3 !important; /* ���ο� ���� ���� �ڵ� ���� */
+        height: 80px !important; 
+        width: 106px !important;
+        aspect-ratio: unset !important; /* ���ο� ���� ���� �ڵ� ���� */
     }
 }
 
+
+@media (max-width: 950px) and (orientation: landscape) {
+    body.layout-speaker .video-wrapper .video-label {
+        font-size: 10px !important;
+        padding: 2px 4px !important;
+    }
+}
