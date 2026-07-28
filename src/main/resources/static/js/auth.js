@@ -44,6 +44,14 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     function closeModal() { authModal.classList.add('hidden'); }
 
+    function showError(msg, isSuccess = false) {
+        if(authError) {
+            authError.textContent = msg;
+            authError.style.color = isSuccess ? 'var(--success-color)' : 'var(--error-color)';
+            authError.classList.remove('hidden');
+        }
+    }
+
     if(closeModalBtn) closeModalBtn.addEventListener('click', closeModal);
     if(navLoginBtn) navLoginBtn.addEventListener('click', () => openModal('login'));
     if(navSignupBtn) navSignupBtn.addEventListener('click', () => openModal('signup'));
@@ -191,6 +199,35 @@ document.addEventListener('DOMContentLoaded', () => {
             if(mypageMessage) mypageMessage.classList.remove('hidden');
         });
     }
+
+    function updateUI() {
+        if (currentUser) {
+            if(guestActions) guestActions.style.display = 'none';
+            if(userProfile) userProfile.style.display = 'flex';
+            if(userNameEl) {
+                const meta = currentUser.user_metadata || {};
+                const email = currentUser.email;
+                userNameEl.textContent = meta.name || (email ? email.split('@')[0] : '사용자');
+            }
+        } else {
+            if(guestActions) guestActions.style.display = 'flex';
+            if(userProfile) userProfile.style.display = 'none';
+            if(userNameEl) userNameEl.textContent = '';
+        }
+    }
+
+    supabase.auth.onAuthStateChange((event, session) => {
+        currentUser = session ? session.user : null;
+        if (event === 'SIGNED_IN') {
+            closeModal();
+        }
+        updateUI();
+    });
+
+    supabase.auth.getSession().then(({ data: { session } }) => {
+        currentUser = session ? session.user : null;
+        updateUI();
+    });
 });
 
 // 마이페이지에서 설정된 값을 index.js에서 활용할 수 있도록 노출
