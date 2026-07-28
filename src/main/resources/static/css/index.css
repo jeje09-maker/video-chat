@@ -134,7 +134,7 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     .hero-content { margin-top: 20px !important; }
 }
 
-.hero-content { flex: 1; color: white; max-width: 500px; margin-top: 45vh; }
+.hero-content { flex: 1; color: white; max-width: 500px; margin-top: calc(45vh - 80px); }
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
@@ -166,7 +166,7 @@ body.dark-mode .hero-subtitle { color: rgba(255, 255, 255, 0.9); }
 body.dark-mode .badge { background: rgba(129, 140, 248, 0.2); color: #818cf8; }
 
 /* Action Panel (Glass Card) */
-.hero-action-panel { flex: 0.8; max-width: 420px; width: 100%; margin-top: 45vh; }
+.hero-action-panel { flex: 0.8; max-width: 420px; width: 100%; margin-top: calc(45vh - 80px); }
 .glass-card {
     background: var(--card-bg-light);
     backdrop-filter: blur(20px);
