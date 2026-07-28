@@ -11,10 +11,12 @@ const closeModalBtn = document.getElementById('close-modal-btn');
 const userProfile = document.getElementById('user-profile');
 const userNameEl = document.getElementById('user-name');
 const authError = document.getElementById('auth-error');
+const guestActions = document.getElementById('guest-actions');
 const navLoginBtn = document.getElementById('nav-login-btn');
+const navSignupBtn = document.getElementById('nav-signup-btn');
 
 // 마이페이지 DOM
-const mypageBtn = document.getElementById('mypage-btn');
+const mypageTrigger = document.getElementById('mypage-trigger');
 const mypageModal = document.getElementById('mypage-modal');
 const closeMypageBtn = document.getElementById('close-mypage-btn');
 const mypageSaveBtn = document.getElementById('mypage-save-btn');
@@ -41,7 +43,8 @@ function openModal(mode = 'login') {
 function closeModal() { authModal.classList.add('hidden'); }
 
 closeModalBtn.addEventListener('click', closeModal);
-navLoginBtn.addEventListener('click', () => openModal('login'));
+if(navLoginBtn) navLoginBtn.addEventListener('click', () => openModal('login'));
+if(navSignupBtn) navSignupBtn.addEventListener('click', () => openModal('signup'));
 
 // Auth 탭 전환 로직
 function switchAuthTab(mode) {
@@ -92,14 +95,14 @@ function showError(msg, isSuccess = false) {
 function updateUI(user) {
     currentUser = user;
     if (user) {
-        navLoginBtn.classList.add('hidden');
+        if(guestActions) guestActions.classList.add('hidden');
         userProfile.classList.remove('hidden');
         
         const name = user.user_metadata?.name || user.email.split('@')[0];
         userNameEl.textContent = name;
         closeModal();
     } else {
-        navLoginBtn.classList.remove('hidden');
+        if(guestActions) guestActions.classList.remove('hidden');
         userProfile.classList.add('hidden');
     }
 }
@@ -164,22 +167,24 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
 // ----------------------------------------
 // 마이페이지 (user_metadata)
 // ----------------------------------------
-mypageBtn.addEventListener('click', async () => {
-    if (!currentUser) return;
-    
-    // 데이터 로드
-    const meta = currentUser.user_metadata || {};
-    const roomCount = meta.room_count || 0;
-    
-    // UI 반영
-    mypageRoomCount.textContent = `${roomCount}회`;
-    mypageMicToggle.checked = meta.mic !== false;
-    mypageVideoToggle.checked = meta.video !== false;
-    mypageBgSelect.value = meta.bg || 'none';
-    
-    mypageMessage.classList.add('hidden');
-    mypageModal.classList.remove('hidden');
-});
+if(mypageTrigger) {
+    mypageTrigger.addEventListener('click', async () => {
+        if (!currentUser) return;
+        
+        // 데이터 로드
+        const meta = currentUser.user_metadata || {};
+        const roomCount = meta.room_count || 0;
+        
+        // UI 반영
+        mypageRoomCount.textContent = `${roomCount}회`;
+        mypageMicToggle.checked = meta.mic !== false;
+        mypageVideoToggle.checked = meta.video !== false;
+        mypageBgSelect.value = meta.bg || 'none';
+        
+        mypageMessage.classList.add('hidden');
+        mypageModal.classList.remove('hidden');
+    });
+}
 
 closeMypageBtn.addEventListener('click', () => {
     mypageModal.classList.add('hidden');

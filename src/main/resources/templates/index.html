@@ -35,12 +35,16 @@
                 </label>
             </div>
             <!-- 로그인 전 -->
-            <button id="nav-login-btn" class="nav-btn">로그인 / 가입하기</button>
+            <div id="guest-actions" style="display: flex; gap: 10px; align-items: center;">
+                <button id="nav-login-btn" class="text-btn">로그인</button>
+                <button id="nav-signup-btn" class="nav-btn">가입하기</button>
+            </div>
             <!-- 로그인 후 -->
-            <div id="user-profile" class="user-profile hidden">
-                <div class="avatar">👤</div>
-                <span id="user-name"></span>
-                <button id="mypage-btn" class="text-btn" style="margin-right: 10px;">마이페이지</button>
+            <div id="user-profile" class="user-profile hidden" style="display: flex; align-items: center;">
+                <div id="mypage-trigger" title="마이페이지 열기" style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-light); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border-light); margin-right: 15px; transition: all 0.2s;">
+                    <span class="avatar" style="font-size: 1.1rem;">🟢</span>
+                    <span id="user-name" style="font-weight: 600;"></span>
+                </div>
                 <button id="logout-btn" class="text-btn">로그아웃</button>
             </div>
         </div>
