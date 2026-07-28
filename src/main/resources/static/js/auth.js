@@ -1,6 +1,6 @@
 // Supabase API 키 설정 (추후 사용자 제공 키로 교체 예정)
-const SUPABASE_URL = 'YOUR_SUPABASE_URL';
-const SUPABASE_ANON_KEY = 'YOUR_SUPABASE_ANON_KEY';
+const SUPABASE_URL = 'https://qhqgyipsvcsanghyvhau.supabase.co';
+const SUPABASE_ANON_KEY = 'sb_publishable_2SniaLTf89_tcZQJ-PmdZw_0XirZos3';
 
 // Supabase 클라이언트 초기화
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
