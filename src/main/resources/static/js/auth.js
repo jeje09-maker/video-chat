@@ -5,37 +5,38 @@ const SUPABASE_ANON_KEY = 'sb_publishable_2SniaLTf89_tcZQJ-PmdZw_0XirZos3';
 // Supabase 클라이언트 초기화
 const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-// DOM 요소
-const authModal = document.getElementById('auth-modal');
-const closeModalBtn = document.getElementById('close-modal-btn');
-const userProfile = document.getElementById('user-profile');
-const userNameEl = document.getElementById('user-name');
-const authError = document.getElementById('auth-error');
-const guestActions = document.getElementById('guest-actions');
-const navLoginBtn = document.getElementById('nav-login-btn');
-const navSignupBtn = document.getElementById('nav-signup-btn');
-
-// 마이페이지 DOM
-const mypageTrigger = document.getElementById('mypage-trigger');
-const mypageModal = document.getElementById('mypage-modal');
-const closeMypageBtn = document.getElementById('close-mypage-btn');
-const mypageSaveBtn = document.getElementById('mypage-save-btn');
-const mypageMessage = document.getElementById('mypage-message');
-const mypageMicToggle = document.getElementById('mypage-mic-toggle');
-const mypageVideoToggle = document.getElementById('mypage-video-toggle');
-const mypageBgSelect = document.getElementById('mypage-bg-select');
-const mypageRoomCount = document.getElementById('mypage-room-count');
-
-// Auth Tabs
-const authTabLogin = document.getElementById('auth-tab-login');
-const authTabSignup = document.getElementById('auth-tab-signup');
-const pwdConfirmInput = document.getElementById('password-confirm-input');
-const emailActionBtn = document.getElementById('email-action-btn');
-
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' | 'signup'
 
 document.addEventListener('DOMContentLoaded', () => {
+    // DOM 요소
+    const authModal = document.getElementById('auth-modal');
+    const closeModalBtn = document.getElementById('close-modal-btn');
+    const userProfile = document.getElementById('user-profile');
+    const userNameEl = document.getElementById('user-name');
+    const authError = document.getElementById('auth-error');
+    const guestActions = document.getElementById('guest-actions');
+    const navLoginBtn = document.getElementById('nav-login-btn');
+    const navSignupBtn = document.getElementById('nav-signup-btn');
+
+    // 마이페이지 DOM
+    const mypageTrigger = document.getElementById('mypage-trigger');
+    const mypageModal = document.getElementById('mypage-modal');
+    const closeMypageBtn = document.getElementById('close-mypage-btn');
+    const mypageSaveBtn = document.getElementById('mypage-save-btn');
+    const mypageMessage = document.getElementById('mypage-message');
+    const mypageMicToggle = document.getElementById('mypage-mic-toggle');
+    const mypageVideoToggle = document.getElementById('mypage-video-toggle');
+    const mypageBgSelect = document.getElementById('mypage-bg-select');
+    const mypageRoomCount = document.getElementById('mypage-room-count');
+
+    // Auth Tabs
+    const authTabLogin = document.getElementById('auth-tab-login');
+    const authTabSignup = document.getElementById('auth-tab-signup');
+    const pwdConfirmInput = document.getElementById('password-confirm-input');
+    const emailActionBtn = document.getElementById('email-action-btn');
+    const tabCreate = document.getElementById('tab-create');
+    const tabSchedule = document.getElementById('tab-schedule');
     // 모달 제어
     function openModal(mode = 'login') {
         authModal.classList.remove('hidden');
