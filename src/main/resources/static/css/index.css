@@ -294,6 +294,7 @@ body.dark-mode .features-section { background: rgba(0,0,0,0.2); }
 }
 body.dark-mode .feature-card { background: var(--card-bg-dark); border-color: var(--border-dark); box-shadow: var(--shadow-dark); }
 .feature-card:hover { transform: translateY(-10px); }
+.feature-img { width: 100px; height: 100px; object-fit: cover; margin-bottom: 20px; border-radius: 16px; box-shadow: 0 8px 25px rgba(0,0,0,0.1); }
 .feature-icon { font-size: 3rem; margin-bottom: 20px; }
 .feature-card h3 { font-size: 1.2rem; margin-bottom: 15px; }
 .feature-card p { color: var(--text-sub-light); line-height: 1.6; }
