@@ -125,6 +125,7 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     justify-content: space-between;
     padding: 100px 10%;
     gap: 50px;
+    background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/images/hero-bg.png') no-repeat center center/cover;
 }
 @media(max-width: 900px) {
     .hero-section { flex-direction: column; text-align: center; padding-top: 120px; justify-content: center; }
@@ -132,15 +133,16 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     .hero-action-panel { width: 100%; max-width: 480px; }
 }
 
-.hero-content { flex: 1; }
+.hero-content { flex: 1; color: white; }
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
     line-height: 1.2;
     margin-bottom: 20px;
+    color: white;
 }
 .highlight {
-    background: linear-gradient(135deg, var(--primary-color), #a855f7);
+    background: linear-gradient(135deg, #a855f7, #6366f1);
     -webkit-background-clip: text;
     -webkit-text-fill-color: transparent;
 }
@@ -148,9 +150,9 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     font-size: 1.2rem;
     line-height: 1.6;
     margin-bottom: 30px;
-    color: var(--text-sub-light);
+    color: rgba(255, 255, 255, 0.9);
 }
-body.dark-mode .hero-subtitle { color: var(--text-sub-dark); }
+body.dark-mode .hero-subtitle { color: rgba(255, 255, 255, 0.9); }
 .hero-badges { display: flex; gap: 15px; flex-wrap: wrap; }
 .badge {
     padding: 8px 15px;
