@@ -507,7 +507,7 @@ video.memberVideo {
 /* ── 스피커 모드에서 오버레이 썸네일 크기 제한 ── */
 body.layout-speaker .video-wrapper {
     cursor: pointer;
-    padding: 10px;
+    border: 1px solid #000;
     transition: opacity 0.4s ease-in-out; /* 부드러운 투명도 변경 */
 }
 
