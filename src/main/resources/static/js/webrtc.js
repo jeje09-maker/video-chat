@@ -330,6 +330,7 @@ function selectMainVideo(sessionId, stream) {
                     managerMic.style.color = micIcon.style.color || '#fff';
                 }
             }
+            window.managerVideoSessionId = sessionId;
         }
     }
 }
@@ -516,7 +517,8 @@ async function createPeerConnection(sessionId, type, event) {
             addMemberVideo(sessionId, stream);
 
             // 관리자 화면 수신 시 (내가 멤버일 때) 메인 화면으로 설정
-            if (type === 'manager') {
+            // 또는, 내가 관리자인데 현재 메인 화면이 '나'일 경우, 새로 접속한 사람의 화면으로 자동 전환
+            if (type === 'manager' || (myType === 'manager' && window.managerVideoSessionId === window.mySessionId)) {
                 selectMainVideo(sessionId, stream);
             }
 
