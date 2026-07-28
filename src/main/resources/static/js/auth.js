@@ -35,9 +35,6 @@ const emailActionBtn = document.getElementById('email-action-btn');
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' | 'signup'
 
-let currentUser = null;
-let currentAuthMode = 'login'; // 'login' | 'signup'
-
 document.addEventListener('DOMContentLoaded', () => {
     // 모달 제어
     function openModal(mode = 'login') {
@@ -195,77 +192,19 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-// Auth 탭 전환 로직
-function switchAuthTab(mode) {
-    currentAuthMode = mode;
-    authError.classList.add('hidden');
-    
-    if (mode === 'login') {
-        authTabLogin.classList.add('active');
-        authTabSignup.classList.remove('active');
-        pwdConfirmInput.classList.add('hidden');
-        emailActionBtn.textContent = '로그인';
-    } else {
-        authTabSignup.classList.add('active');
-        authTabLogin.classList.remove('active');
-        pwdConfirmInput.classList.remove('hidden');
-        emailActionBtn.textContent = '회원가입';
-    }
-}
-authTabLogin.addEventListener('click', () => switchAuthTab('login'));
-authTabSignup.addEventListener('click', () => switchAuthTab('signup'));
-
-// 방 만들기 탭 접근 제어
-const tabCreate = document.getElementById('tab-create');
-const tabSchedule = document.getElementById('tab-schedule');
-
-tabCreate.addEventListener('click', (e) => {
-    if (!currentUser) {
-        e.preventDefault();
-        openModal('signup'); // 비회원이 방 만들기를 누르면 가입 탭으로 띄움
-    }
-});
-tabSchedule.addEventListener('click', (e) => {
-    if (!currentUser) {
-        e.preventDefault();
-        openModal('login');
-    }
-});
-
-// 에러 메시지 표시
-function showError(msg, isSuccess = false) {
-    authError.textContent = msg;
-    authError.style.color = isSuccess ? 'var(--success-color)' : 'var(--error-color)';
-    authError.classList.remove('hidden');
-    setTimeout(() => authError.classList.add('hidden'), 5000);
-}
-
-// UI 상태 업데이트
-function updateUI(user) {
-    currentUser = user;
-    if (user) {
-        if(guestActions) guestActions.classList.add('hidden');
-        if(userProfile) userProfile.classList.remove('hidden');
-        
-        const name = user.user_metadata?.name || user.email.split('@')[0];
-        if(userNameEl) userNameEl.textContent = name;
-        if(authModal) authModal.classList.add('hidden');
-    } else {
-        if(guestActions) guestActions.classList.remove('hidden');
-        if(userProfile) userProfile.classList.add('hidden');
-    }
-}
-
-// 초기 세션 확인
-async function checkSession() {
-    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
-    const { data: { session } } = await supabase.auth.getSession();
-    updateUI(session?.user);
-
-    supabase.auth.onAuthStateChange((_event, session) => {
+    // 초기 세션 확인
+    async function checkSession() {
+        if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
+        const { data: { session } } = await supabase.auth.getSession();
         updateUI(session?.user);
-    });
-}
+
+        supabase.auth.onAuthStateChange((_event, session) => {
+            updateUI(session?.user);
+        });
+    }
+
+    checkSession();
+});
 
 // 마이페이지에서 설정된 값을 index.js에서 활용할 수 있도록 노출
 window.getUserSettings = function() {
@@ -289,5 +228,3 @@ window.incrementRoomCount = async function() {
     });
     if(data.user) currentUser = data.user;
 };
-
-checkSession();
