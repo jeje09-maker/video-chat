@@ -192,20 +192,6 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 });
 
-    // 초기 세션 확인
-    async function checkSession() {
-        if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
-        const { data: { session } } = await supabase.auth.getSession();
-        updateUI(session?.user);
-
-        supabase.auth.onAuthStateChange((_event, session) => {
-            updateUI(session?.user);
-        });
-    }
-
-    checkSession();
-});
-
 // 마이페이지에서 설정된 값을 index.js에서 활용할 수 있도록 노출
 window.getUserSettings = function() {
     if(!currentUser) return { mic: true, video: true, bg: 'none' };
