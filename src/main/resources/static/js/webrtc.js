@@ -474,7 +474,17 @@ async function createPeerConnection(sessionId, type, event) {
         iceServers: [
             {urls: "stun:stun.l.google.com:19302"},
             {urls: "stun:stun1.l.google.com:19302"},
-            {urls: "stun:stun2.l.google.com:19302"} // 구글 STUN 서버
+            {urls: "stun:stun2.l.google.com:19302"}, // 구글 STUN 서버
+            {
+                urls: "turn:openrelay.metered.ca:80",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            },
+            {
+                urls: "turn:openrelay.metered.ca:443",
+                username: "openrelayproject",
+                credential: "openrelayproject"
+            }
         ],
         iceTransportPolicy: "all" // "ready" 대신 "all"로 설정하여 P2P 연결 우선
     });
@@ -632,13 +642,6 @@ async function handleOffer(sessionId, offerSdp, type, event) {
         try {
             const parsedOffer = new RTCSessionDescription(JSON.parse(offerSdp));
             await peerConnection.setRemoteDescription(parsedOffer);
-
-            let retryCount = 0;
-            while (peerConnection.signalingState !== "stable" && retryCount < 10) { // 10번 이상 반복 안 함
-                console.log(`signalingState 대기 중... (${peerConnection.signalingState})`);
-                await new Promise(resolve => setTimeout(resolve, 100)); // 100ms 대기
-                retryCount++;
-            }
 
             const answer = await peerConnection.createAnswer();
             await peerConnection.setLocalDescription(answer);
