@@ -13,38 +13,77 @@ const userNameEl = document.getElementById('user-name');
 const authError = document.getElementById('auth-error');
 const navLoginBtn = document.getElementById('nav-login-btn');
 
+// 마이페이지 DOM
+const mypageBtn = document.getElementById('mypage-btn');
+const mypageModal = document.getElementById('mypage-modal');
+const closeMypageBtn = document.getElementById('close-mypage-btn');
+const mypageSaveBtn = document.getElementById('mypage-save-btn');
+const mypageMessage = document.getElementById('mypage-message');
+const mypageMicToggle = document.getElementById('mypage-mic-toggle');
+const mypageVideoToggle = document.getElementById('mypage-video-toggle');
+const mypageBgSelect = document.getElementById('mypage-bg-select');
+const mypageRoomCount = document.getElementById('mypage-room-count');
+
+// Auth Tabs
+const authTabLogin = document.getElementById('auth-tab-login');
+const authTabSignup = document.getElementById('auth-tab-signup');
+const pwdConfirmInput = document.getElementById('password-confirm-input');
+const emailActionBtn = document.getElementById('email-action-btn');
+
 let currentUser = null;
+let currentAuthMode = 'login'; // 'login' | 'signup'
 
 // 모달 제어
-function openModal() { authModal.classList.remove('hidden'); }
+function openModal(mode = 'login') {
+    authModal.classList.remove('hidden');
+    switchAuthTab(mode);
+}
 function closeModal() { authModal.classList.add('hidden'); }
 
 closeModalBtn.addEventListener('click', closeModal);
-navLoginBtn.addEventListener('click', openModal);
+navLoginBtn.addEventListener('click', () => openModal('login'));
+
+// Auth 탭 전환 로직
+function switchAuthTab(mode) {
+    currentAuthMode = mode;
+    authError.classList.add('hidden');
+    
+    if (mode === 'login') {
+        authTabLogin.classList.add('active');
+        authTabSignup.classList.remove('active');
+        pwdConfirmInput.classList.add('hidden');
+        emailActionBtn.textContent = '로그인';
+    } else {
+        authTabSignup.classList.add('active');
+        authTabLogin.classList.remove('active');
+        pwdConfirmInput.classList.remove('hidden');
+        emailActionBtn.textContent = '회원가입';
+    }
+}
+authTabLogin.addEventListener('click', () => switchAuthTab('login'));
+authTabSignup.addEventListener('click', () => switchAuthTab('signup'));
 
 // 방 만들기 탭 접근 제어
 const tabCreate = document.getElementById('tab-create');
 const tabSchedule = document.getElementById('tab-schedule');
-const createUnauthMsg = document.getElementById('create-unauth-msg');
-const createAuthSection = document.getElementById('create-auth-section');
 
 tabCreate.addEventListener('click', (e) => {
     if (!currentUser) {
         e.preventDefault();
-        openModal();
+        openModal('signup'); // 비회원이 방 만들기를 누르면 가입 탭으로 띄움
     }
 });
-
 tabSchedule.addEventListener('click', (e) => {
     if (!currentUser) {
         e.preventDefault();
-        openModal();
+        openModal('login');
     }
 });
 
 // 에러 메시지 표시
-function showError(msg) {
+function showError(msg, isSuccess = false) {
     authError.textContent = msg;
+    authError.style.color = isSuccess ? 'var(--success-color)' : 'var(--error-color)';
     authError.classList.remove('hidden');
     setTimeout(() => authError.classList.add('hidden'), 5000);
 }
@@ -53,34 +92,21 @@ function showError(msg) {
 function updateUI(user) {
     currentUser = user;
     if (user) {
-        // 로그인 상태
         navLoginBtn.classList.add('hidden');
         userProfile.classList.remove('hidden');
         
-        // 이메일 또는 소셜 닉네임 표시
         const name = user.user_metadata?.name || user.email.split('@')[0];
         userNameEl.textContent = name;
-        
-        // 방 만들기 메뉴 활성화
-        if(createAuthSection) createAuthSection.classList.remove('hidden');
-        if(createUnauthMsg) createUnauthMsg.classList.add('hidden');
-        
         closeModal();
     } else {
-        // 로그아웃 상태
         navLoginBtn.classList.remove('hidden');
         userProfile.classList.add('hidden');
-        
-        // 방 만들기 메뉴 비활성화
-        if(createAuthSection) createAuthSection.classList.add('hidden');
-        if(createUnauthMsg) createUnauthMsg.classList.remove('hidden');
     }
 }
 
 // 초기 세션 확인
 async function checkSession() {
     if (SUPABASE_URL === 'YOUR_SUPABASE_URL') return;
-    
     const { data: { session } } = await supabase.auth.getSession();
     updateUI(session?.user);
 
@@ -89,38 +115,40 @@ async function checkSession() {
     });
 }
 
-// 이메일 로그인
-document.getElementById('email-login-btn').addEventListener('click', async () => {
+// 이메일 액션 (로그인/가입)
+emailActionBtn.addEventListener('click', async () => {
     const email = document.getElementById('email-input').value;
     const password = document.getElementById('password-input').value;
+    const passwordConfirm = pwdConfirmInput.value;
     
     if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
     
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
-    if (error) showError(error.message);
-});
-
-// 이메일 회원가입
-document.getElementById('email-signup-btn').addEventListener('click', async () => {
-    const email = document.getElementById('email-input').value;
-    const password = document.getElementById('password-input').value;
-    
-    if (!email || !password) return showError('이메일과 비밀번호를 입력해주세요.');
-    
-    const { data, error } = await supabase.auth.signUp({ email, password });
-    if (error) {
-        showError(error.message);
+    if (currentAuthMode === 'signup') {
+        if (password !== passwordConfirm) return showError('비밀번호가 일치하지 않습니다.');
+        
+        const { data, error } = await supabase.auth.signUp({ 
+            email, 
+            password,
+            options: {
+                data: { mic: true, video: true, bg: 'none', room_count: 0 } // 초기 세팅
+            }
+        });
+        
+        if (error) {
+            showError(error.message);
+        } else {
+            showError('가입이 완료되었습니다!', true);
+            setTimeout(() => switchAuthTab('login'), 1500);
+        }
     } else {
-        showError('회원가입 성공! 이메일을 확인하거나 로그인해주세요.', true);
-        authError.style.color = 'var(--success-color)';
+        // 로그인
+        const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+        if (error) showError(error.message);
     }
 });
 
 // 소셜 로그인 공통 함수
 async function signInWithProvider(provider) {
-    if (SUPABASE_URL === 'YOUR_SUPABASE_URL') {
-        return showError('Supabase 세팅이 아직 완료되지 않았습니다.');
-    }
     const { data, error } = await supabase.auth.signInWithOAuth({ provider: provider });
     if (error) showError(error.message);
 }
@@ -133,9 +161,72 @@ document.getElementById('logout-btn').addEventListener('click', async () => {
     await supabase.auth.signOut();
 });
 
-// 비회원이 로그인 버튼 클릭
-if(document.getElementById('back-to-login-btn')) {
-    document.getElementById('back-to-login-btn').addEventListener('click', openModal);
-}
+// ----------------------------------------
+// 마이페이지 (user_metadata)
+// ----------------------------------------
+mypageBtn.addEventListener('click', async () => {
+    if (!currentUser) return;
+    
+    // 데이터 로드
+    const meta = currentUser.user_metadata || {};
+    const roomCount = meta.room_count || 0;
+    
+    // UI 반영
+    mypageRoomCount.textContent = `${roomCount}회`;
+    mypageMicToggle.checked = meta.mic !== false;
+    mypageVideoToggle.checked = meta.video !== false;
+    mypageBgSelect.value = meta.bg || 'none';
+    
+    mypageMessage.classList.add('hidden');
+    mypageModal.classList.remove('hidden');
+});
+
+closeMypageBtn.addEventListener('click', () => {
+    mypageModal.classList.add('hidden');
+});
+
+mypageSaveBtn.addEventListener('click', async () => {
+    const mic = mypageMicToggle.checked;
+    const video = mypageVideoToggle.checked;
+    const bg = mypageBgSelect.value;
+    
+    const { data, error } = await supabase.auth.updateUser({
+        data: { mic: mic, video: video, bg: bg }
+    });
+    
+    if (error) {
+        mypageMessage.textContent = error.message;
+        mypageMessage.style.color = 'var(--error-color)';
+    } else {
+        currentUser = data.user;
+        mypageMessage.textContent = '설정이 저장되었습니다.';
+        mypageMessage.style.color = 'var(--success-color)';
+        setTimeout(() => mypageModal.classList.add('hidden'), 1000);
+    }
+    mypageMessage.classList.remove('hidden');
+});
+
+// 마이페이지에서 설정된 값을 index.js에서 활용할 수 있도록 노출
+window.getUserSettings = function() {
+    if(!currentUser) return { mic: true, video: true, bg: 'none' };
+    const meta = currentUser.user_metadata || {};
+    return {
+        mic: meta.mic !== false,
+        video: meta.video !== false,
+        bg: meta.bg || 'none'
+    };
+};
+
+// 방 개설 시 카운트 증가 함수 노출
+window.incrementRoomCount = async function() {
+    if(!currentUser) return;
+    const meta = currentUser.user_metadata || {};
+    const count = (meta.room_count || 0) + 1;
+    
+    const { data } = await supabase.auth.updateUser({
+        data: { room_count: count }
+    });
+    if(data.user) currentUser = data.user;
+};
 
 checkSession();

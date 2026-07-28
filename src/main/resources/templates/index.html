@@ -35,11 +35,12 @@
                 </label>
             </div>
             <!-- 로그인 전 -->
-            <button id="nav-login-btn" class="nav-btn">로그인</button>
+            <button id="nav-login-btn" class="nav-btn">로그인 / 가입하기</button>
             <!-- 로그인 후 -->
             <div id="user-profile" class="user-profile hidden">
                 <div class="avatar">👤</div>
                 <span id="user-name"></span>
+                <button id="mypage-btn" class="text-btn" style="margin-right: 10px;">마이페이지</button>
                 <button id="logout-btn" class="text-btn">로그아웃</button>
             </div>
         </div>
@@ -154,8 +155,13 @@
         <div class="modal-content">
             <button id="close-modal-btn" class="close-btn">&times;</button>
             <div class="modal-header">
-                <h3>시작하기 전에</h3>
+                <h3>환영합니다</h3>
                 <p>채팅방을 만들려면 로그인이 필요합니다.</p>
+            </div>
+            
+            <div class="auth-tabs" style="display:flex; margin-bottom:20px; border-bottom:1px solid var(--border-light);">
+                <button id="auth-tab-login" class="tab-btn active" style="flex:1; border:none; border-bottom:2px solid transparent; background:none;">로그인</button>
+                <button id="auth-tab-signup" class="tab-btn" style="flex:1; border:none; border-bottom:2px solid transparent; background:none;">회원가입</button>
             </div>
             
             <div class="social-login-group">
@@ -174,10 +180,54 @@
             <div class="email-login-group">
                 <input type="email" id="email-input" class="modern-input modal-input" placeholder="이메일" />
                 <input type="password" id="password-input" class="modern-input modal-input" placeholder="비밀번호" />
-                <button id="email-login-btn" class="primary-btn">로그인</button>
-                <button id="email-signup-btn" class="outline-btn" style="margin-top: 10px;">회원가입</button>
+                <input type="password" id="password-confirm-input" class="modern-input modal-input hidden" placeholder="비밀번호 확인" />
+                <button id="email-action-btn" class="primary-btn">로그인</button>
             </div>
             <p id="auth-error" class="error-text hidden"></p>
+        </div>
+    </div>
+
+    <!-- 마이페이지 모달 -->
+    <div id="mypage-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button id="close-mypage-btn" class="close-btn">&times;</button>
+            <div class="modal-header">
+                <h3>마이페이지</h3>
+                <p>입장 시 기본 설정 및 나의 통계</p>
+            </div>
+            
+            <div class="mypage-stats" style="margin-bottom:20px; padding:15px; background:var(--bg-light); border-radius:12px; text-align:center;">
+                <span style="font-size:0.9rem; color:var(--text-sub-light);">총 방 개설 횟수</span>
+                <div style="font-size:1.5rem; font-weight:700; color:var(--primary-color); margin-top:5px;" id="mypage-room-count">0회</div>
+            </div>
+
+            <div class="settings-group" style="text-align:left;">
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span class="label">마이크 기본 설정</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="mypage-mic-toggle" checked />
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+                <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+                    <span class="label">비디오 기본 설정</span>
+                    <label class="theme-switch">
+                        <input type="checkbox" id="mypage-video-toggle" checked />
+                        <div class="slider round"></div>
+                    </label>
+                </div>
+                <div class="setting-item" style="margin-bottom:15px;">
+                    <span class="label" style="display:block; margin-bottom:10px;">기본 배경화면</span>
+                    <select id="mypage-bg-select" class="modern-input" style="padding:10px;">
+                        <option value="none">원본 (배경 없음)</option>
+                        <option value="blur">흐리게 (블러 처리)</option>
+                        <option value="office">아늑한 오피스</option>
+                    </select>
+                </div>
+                <button id="mypage-save-btn" class="primary-btn" style="margin-top:20px;">설정 저장하기</button>
+            </div>
+            <p id="mypage-message" class="error-text hidden" style="color:var(--success-color);"></p>
         </div>
     </div>
 

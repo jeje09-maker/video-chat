@@ -8,6 +8,9 @@ const myType = path.split('/')[3];  // 회원 or 관리자
 
 const urlParams = new URLSearchParams(window.location.search);
 const userName = urlParams.get('name') || '';
+const initMic = urlParams.get('mic') !== 'false';
+const initVideo = urlParams.get('video') !== 'false';
+const initBg = urlParams.get('bg') || 'none';
 
 // 이름 매핑을 저장하는 전역 객체
 window.userNames = {};
@@ -96,6 +99,27 @@ socket.onmessage = async (event) => {
                     managerVideo.srcObject = window.localStream;
                     managerVideo.muted = true;
                     managerVideo.play().catch(e => console.warn('[first-join] managerVideo play() 실패:', e));
+                }
+                
+                // 설정된 배경화면 적용
+                if (initBg !== 'none' && typeof window.setVirtualBackground === 'function') {
+                    let bgValue = initBg;
+                    if (initBg === 'office') bgValue = 'https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1280&q=80';
+                    window.setVirtualBackground(bgValue);
+                }
+                
+                // 버튼 UI 동기화
+                if (!initMic) {
+                    const btn = document.getElementById('toggleAudioBtn');
+                    if (btn) btn.classList.add('btn-muted');
+                    const icon = document.getElementById('audioIcon');
+                    if (icon) icon.innerText = 'mic_off';
+                }
+                if (!initVideo) {
+                    const btn = document.getElementById('toggleCameraBtn');
+                    if (btn) btn.classList.add('btn-muted');
+                    const icon = document.getElementById('cameraIcon');
+                    if (icon) icon.innerText = 'videocam_off';
                 }
                 // 멤버: 자기 영상 썸네일 추가는 handleJoinMember에서 mySessionId 확정 후 처리
             }
@@ -219,8 +243,14 @@ async function getMediaStream() {
 
         // 비디오 + 오디오 트랙을 하나의 스트림으로 합치기
         const combinedStream = new MediaStream();
-        videoStream.getTracks().forEach(track => combinedStream.addTrack(track));
-        audioStream.getTracks().forEach(track => combinedStream.addTrack(track));
+        videoStream.getTracks().forEach(track => {
+            track.enabled = initVideo;
+            combinedStream.addTrack(track);
+        });
+        audioStream.getTracks().forEach(track => {
+            track.enabled = initMic;
+            combinedStream.addTrack(track);
+        });
 
         // virtual-background는 사용자가 직접 배경을 선택할 때만 활성화.
         // 초기 스트림은 항상 원본 카메라 스트림을 그대로 반환.
@@ -836,7 +866,7 @@ function toggleAudio() {
             const btn  = document.getElementById('toggleAudioBtn');
             const icon = document.getElementById('audioIcon');
             if (icon) {
-                icon.innerText = track.enabled ? 'mic' : 'mic';
+                icon.innerText = track.enabled ? 'mic' : 'mic_off';
             }
             if (btn) {
                 btn.classList.toggle('btn-muted', !track.enabled);
@@ -856,7 +886,7 @@ function toggleCamera() {
             const btn  = document.getElementById('toggleCameraBtn');
             const icon = document.getElementById('cameraIcon');
             if (icon) {
-                icon.innerText = track.enabled ? 'videocam' : 'videocam';
+                icon.innerText = track.enabled ? 'videocam' : 'videocam_off';
             }
             if (btn) {
                 btn.classList.toggle('btn-muted', !track.enabled);

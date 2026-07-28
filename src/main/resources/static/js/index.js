@@ -68,7 +68,9 @@ document.addEventListener('DOMContentLoaded', () => {
             const createError = document.getElementById('create-error');
             
             if (currentRoomCode && name) {
-                window.location.href = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}`;
+                const settings = window.getUserSettings ? window.getUserSettings() : { mic: true, video: true, bg: 'none' };
+                if (window.incrementRoomCount) window.incrementRoomCount();
+                window.location.href = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}&mic=${settings.mic}&video=${settings.video}&bg=${settings.bg}`;
             } else if (!name) {
                 if (createError) {
                     createError.classList.remove('hidden');
@@ -102,6 +104,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 return;
             }
             scheduledCode = generateShortCode();
+            if (window.incrementRoomCount) window.incrementRoomCount();
             const inviteLink = `${window.location.origin}/videoChat/${scheduledCode}/member`;
             scheduleLinkSpan.textContent = inviteLink;
             scheduleBtn.classList.add('hidden');
@@ -131,7 +134,8 @@ document.addEventListener('DOMContentLoaded', () => {
             const name = nameInput ? nameInput.value.trim() : '';
             
             if (code && name) {
-                window.location.href = `/videoChat/${code}/member?name=${encodeURIComponent(name)}`;
+                const settings = window.getUserSettings ? window.getUserSettings() : { mic: true, video: true, bg: 'none' };
+                window.location.href = `/videoChat/${code}/member?name=${encodeURIComponent(name)}&mic=${settings.mic}&video=${settings.video}&bg=${settings.bg}`;
             } else {
                 joinError.textContent = "코드와 이름을 모두 입력해주세요!";
                 joinError.classList.remove('hidden');
