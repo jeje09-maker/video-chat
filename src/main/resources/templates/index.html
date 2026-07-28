@@ -17,103 +17,161 @@
     <title>CODEGRASS - VIDEOCHAT</title>
 </head>
 <body>
-    <div class="theme-switch-wrapper">
-        <label class="theme-switch" for="checkbox">
-            <input type="checkbox" id="checkbox" />
-            <div class="slider round">
-                <span class="icon sun">☀️</span>
-                <span class="icon moon">🌙</span>
-            </div>
-        </label>
-    </div>
-
-    <!-- 우측 상단 로그인 상태 표시 -->
-    <div id="user-profile" class="user-profile hidden">
-        <div class="avatar" id="user-avatar">👤</div>
-        <div class="user-info">
-            <span id="user-name"></span>
-            <button id="logout-btn" class="text-btn">로그아웃</button>
+    
+    <!-- 내비게이션 바 -->
+    <nav class="navbar">
+        <div class="nav-logo">
+            <span class="logo-icon">📸</span>
+            <span class="logo-text">VideoChat</span>
         </div>
-    </div>
-
-    <div class="main-container">
-        <div class="glass-card">
-            <div class="logo-area">
-                <div class="pulse-ring"></div>
-                <div class="logo-icon">📸</div>
-                <h1>VideoChat</h1>
-                <p>쉽고 빠른 실시간 화상 회의</p>
+        <div class="nav-actions">
+            <div class="theme-switch-wrapper">
+                <label class="theme-switch" for="checkbox">
+                    <input type="checkbox" id="checkbox" />
+                    <div class="slider round">
+                        <span class="icon sun">☀️</span>
+                        <span class="icon moon">🌙</span>
+                    </div>
+                </label>
             </div>
-            
-            <!-- 로그인 컨테이너 -->
-            <div id="auth-container" class="auth-container">
-                <h3>로그인하여 방 만들기</h3>
-                <p style="margin-bottom: 20px;">참여만 하려면 아래 버튼을 누르세요.</p>
-                
-                <div class="social-login-group">
-                    <button id="google-login-btn" class="social-btn google-btn">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
-                        구글로 계속하기
-                    </button>
-                    <button id="kakao-login-btn" class="social-btn kakao-btn">
-                        <img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/KakaoTalk_logo.svg" alt="Kakao">
-                        카카오톡으로 계속하기
-                    </button>
-                </div>
-                
-                <div class="divider"><span>또는 이메일</span></div>
-                
-                <div class="email-login-group">
-                    <input type="email" id="email-input" class="modern-input" placeholder="이메일" />
-                    <input type="password" id="password-input" class="modern-input" placeholder="비밀번호" />
-                    <button id="email-login-btn" class="primary-btn">로그인</button>
-                    <button id="email-signup-btn" class="outline-btn" style="margin-top: 10px;">회원가입</button>
-                </div>
-                
-                <div class="divider"><span>비회원</span></div>
-                <button id="guest-join-btn" class="outline-btn">코드로 참여하기</button>
-                <p id="auth-error" class="error-text hidden"></p>
+            <!-- 로그인 전 -->
+            <button id="nav-login-btn" class="nav-btn">로그인</button>
+            <!-- 로그인 후 -->
+            <div id="user-profile" class="user-profile hidden">
+                <div class="avatar">👤</div>
+                <span id="user-name"></span>
+                <button id="logout-btn" class="text-btn">로그아웃</button>
             </div>
+        </div>
+    </nav>
 
-            <!-- 메인 앱 컨테이너 (로그인 후 또는 비회원 참여 클릭 시 표시) -->
-            <div id="app-container" class="app-container hidden">
+    <!-- 메인 히어로 섹션 -->
+    <section class="hero-section">
+        <div class="hero-content">
+            <h1 class="hero-title">끊김 없는 초고화질<br><span class="highlight">실시간 화상회의</span></h1>
+            <p class="hero-subtitle">시간 제한 없이, 별도의 설치 없이 브라우저에서 바로 시작하세요. 언제 어디서나 가장 선명하고 빠른 소통을 경험할 수 있습니다.</p>
+            <div class="hero-badges">
+                <span class="badge">🚀 초고속 P2P</span>
+                <span class="badge">⏱️ 무제한 시간</span>
+                <span class="badge">🔒 강력한 보안</span>
+            </div>
+        </div>
+
+        <div class="hero-action-panel">
+            <div class="glass-card">
                 <div class="action-tabs">
-                    <button class="tab-btn active" data-target="create" id="tab-create">방 만들기</button>
-                    <button class="tab-btn" data-target="join" id="tab-join">코드로 참여</button>
+                    <button class="tab-btn active" data-target="create" id="tab-create">채팅방 만들기</button>
+                    <button class="tab-btn" data-target="schedule" id="tab-schedule">채팅방 예약</button>
+                    <button class="tab-btn" data-target="join" id="tab-join">채팅방 참여하기</button>
                 </div>
 
+                <!-- 채팅방 만들기 탭 -->
                 <div class="tab-content active" id="create-content">
-                    <div id="create-unauth-msg" class="hidden" style="padding: 20px 0;">
-                        <p class="error-text" style="display:block; margin-bottom:10px;">방 생성은 로그인한 회원만 가능합니다.</p>
-                        <button id="back-to-login-btn" class="outline-btn">로그인 하러가기</button>
-                    </div>
+                    <p class="panel-desc">새로운 화상 회의를 즉시 시작합니다.</p>
+                    <p class="label">이름 입력</p>
+                    <input type="text" id="create-name-input" class="modern-input" placeholder="이름을 입력하세요" autocomplete="off" />
+                    <button id="generate-btn" class="primary-btn">즉시 시작하기</button>
                     
-                    <div id="create-auth-section">
-                        <button id="generate-btn" class="primary-btn">새 회의 만들기</button>
-                        <div id="room-info" class="hidden">
-                            <p class="label">초대 코드</p>
-                            <div class="code-box">
-                                <span id="room-code"></span>
-                                <button id="copy-btn" class="icon-btn" title="복사하기">📋</button>
-                            </div>
-                            <p class="help-text">친구에게 코드를 공유하세요!</p>
-                            <p class="label">이름 입력</p>
-                            <input type="text" id="create-name-input" class="modern-input" placeholder="이름을 입력하세요" autocomplete="off" style="margin-bottom: 10px;" />
-                            <button id="start-btn" class="success-btn">방장으로 시작하기</button>
-                            <p id="create-error" class="error-text hidden">이름을 입력해주세요!</p>
+                    <!-- 생성된 방 정보 (숨김) -->
+                    <div id="room-info" class="hidden" style="margin-top: 20px; text-align: left;">
+                        <p class="label">초대 코드</p>
+                        <div class="code-box">
+                            <span id="room-code"></span>
+                            <button id="copy-btn" class="icon-btn" title="복사하기">📋</button>
                         </div>
+                        <p class="help-text" style="text-align:center;">친구에게 코드를 공유하세요!</p>
+                        <button id="start-btn" class="success-btn" style="margin-top:10px;">입장하기</button>
                     </div>
                 </div>
 
+                <!-- 채팅방 예약 탭 -->
+                <div class="tab-content" id="schedule-content">
+                    <p class="panel-desc">미리 채팅방 링크를 만들어 초대장을 보낼 수 있습니다.</p>
+                    <p class="label">회의 날짜 및 시간</p>
+                    <input type="datetime-local" id="schedule-time" class="modern-input" style="font-size: 1rem; padding: 12px;"/>
+                    <button id="schedule-btn" class="primary-btn">예약 링크 생성하기</button>
+                    
+                    <div id="schedule-info" class="hidden" style="margin-top: 20px; text-align: left;">
+                        <p class="label">초대 링크 복사</p>
+                        <div class="code-box">
+                            <span id="schedule-link" style="font-size:0.9rem; word-break: break-all;"></span>
+                            <button id="copy-schedule-btn" class="icon-btn" title="복사하기">📋</button>
+                        </div>
+                        <p class="help-text" style="text-align:center;">이 링크를 회의 참석자에게 전달하세요.</p>
+                    </div>
+                </div>
+
+                <!-- 채팅방 참여하기 탭 -->
                 <div class="tab-content" id="join-content">
+                    <p class="panel-desc">전달받은 코드를 입력하여 회의에 참여하세요.</p>
                     <p class="label">초대 코드 입력</p>
-                    <input type="text" id="join-code-input" class="modern-input" placeholder="예: a1b2c3" autocomplete="off" style="margin-bottom: 10px;" />
+                    <input type="text" id="join-code-input" class="modern-input" placeholder="예: a1b2c3" autocomplete="off" />
                     <p class="label">이름 입력</p>
                     <input type="text" id="join-name-input" class="modern-input" placeholder="이름을 입력하세요" autocomplete="off" />
-                    <button id="join-btn" class="primary-btn">참여자로 입장하기</button>
+                    <button id="join-btn" class="primary-btn">참여하기</button>
                     <p id="join-error" class="error-text hidden">코드와 이름을 입력해주세요!</p>
                 </div>
             </div>
+        </div>
+    </section>
+
+    <!-- 특징 소개 섹션 -->
+    <section class="features-section">
+        <h2 class="section-title">오직 <span class="highlight">회의에만 특화된</span> 강력한 기능</h2>
+        <div class="features-grid">
+            <div class="feature-card">
+                <div class="feature-icon">🚀</div>
+                <h3>초고속 P2P 연결</h3>
+                <p>중앙 서버를 거치지 않고 사용자 간 직접 영상을 주고받아 딜레이 없는 쾌적한 환경을 제공합니다.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">⏱️</div>
+                <h3>무제한 시간 무료</h3>
+                <p>40분 제한? 없습니다. 원하는 만큼 자유롭게 회의를 진행하세요.</p>
+            </div>
+            <div class="feature-card">
+                <div class="feature-icon">📱</div>
+                <h3>완벽한 기기 호환성</h3>
+                <p>PC, 스마트폰 태블릿 어디서든 앱 설치 없이 브라우저만으로 즉시 접속 가능합니다.</p>
+            </div>
+        </div>
+    </section>
+
+    <!-- 푸터 -->
+    <footer class="footer">
+        <p>&copy; 2026 CODEGRASS VideoChat. All rights reserved.</p>
+    </footer>
+
+    <!-- 로그인/회원가입 모달 (팝업) -->
+    <div id="auth-modal" class="modal hidden">
+        <div class="modal-backdrop"></div>
+        <div class="modal-content">
+            <button id="close-modal-btn" class="close-btn">&times;</button>
+            <div class="modal-header">
+                <h3>시작하기 전에</h3>
+                <p>채팅방을 만들려면 로그인이 필요합니다.</p>
+            </div>
+            
+            <div class="social-login-group">
+                <button id="google-login-btn" class="social-btn google-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/5/53/Google_%22G%22_Logo.svg" alt="Google">
+                    구글로 계속하기
+                </button>
+                <button id="kakao-login-btn" class="social-btn kakao-btn">
+                    <img src="https://upload.wikimedia.org/wikipedia/commons/e/e3/KakaoTalk_logo.svg" alt="Kakao">
+                    카카오톡으로 계속하기
+                </button>
+            </div>
+            
+            <div class="divider"><span>또는 이메일</span></div>
+            
+            <div class="email-login-group">
+                <input type="email" id="email-input" class="modern-input modal-input" placeholder="이메일" />
+                <input type="password" id="password-input" class="modern-input modal-input" placeholder="비밀번호" />
+                <button id="email-login-btn" class="primary-btn">로그인</button>
+                <button id="email-signup-btn" class="outline-btn" style="margin-top: 10px;">회원가입</button>
+            </div>
+            <p id="auth-error" class="error-text hidden"></p>
         </div>
     </div>
 

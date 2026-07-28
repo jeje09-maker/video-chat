@@ -33,86 +33,123 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     });
 
-    // Room Generation Logic
+    function generateShortCode() {
+        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    }
+    
+    // Toast Helper
+    const toast = document.getElementById('toast');
+    function showToast(msg) {
+        toast.textContent = msg;
+        toast.classList.add('show');
+        setTimeout(() => toast.classList.remove('show'), 3000);
+    }
+
+    // Room Generation Logic (Immediate)
     const generateBtn = document.getElementById('generate-btn');
     const roomInfo = document.getElementById('room-info');
     const roomCodeSpan = document.getElementById('room-code');
     const startBtn = document.getElementById('start-btn');
     let currentRoomCode = '';
 
-    function generateShortCode() {
-        return Math.random().toString(36).substring(2, 8).toUpperCase();
+    if(generateBtn) {
+        generateBtn.addEventListener('click', () => {
+            currentRoomCode = generateShortCode();
+            roomCodeSpan.textContent = currentRoomCode;
+            generateBtn.classList.add('hidden');
+            roomInfo.classList.remove('hidden');
+        });
     }
 
-    generateBtn.addEventListener('click', () => {
-        currentRoomCode = generateShortCode();
-        roomCodeSpan.textContent = currentRoomCode;
-        generateBtn.classList.add('hidden');
-        roomInfo.classList.remove('hidden');
-    });
-
-    startBtn.addEventListener('click', () => {
-        const nameInput = document.getElementById('create-name-input');
-        const name = nameInput ? nameInput.value.trim() : '';
-        const createError = document.getElementById('create-error');
-        
-        if (currentRoomCode && name) {
-            window.location.href = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}`;
-        } else if (!name) {
-            if (createError) {
-                createError.classList.remove('hidden');
-                setTimeout(() => {
-                    createError.classList.add('hidden');
-                }, 2000);
+    if(startBtn) {
+        startBtn.addEventListener('click', () => {
+            const nameInput = document.getElementById('create-name-input');
+            const name = nameInput ? nameInput.value.trim() : '';
+            const createError = document.getElementById('create-error');
+            
+            if (currentRoomCode && name) {
+                window.location.href = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}`;
+            } else if (!name) {
+                if (createError) {
+                    createError.classList.remove('hidden');
+                    setTimeout(() => createError.classList.add('hidden'), 2000);
+                }
             }
-        }
-    });
-
-    // Copy to Clipboard Logic
-    const copyBtn = document.getElementById('copy-btn');
-    const toast = document.getElementById('toast');
-
-    copyBtn.addEventListener('click', () => {
-        const inviteLink = `${window.location.origin}/videoChat/${currentRoomCode}/member`;
-        navigator.clipboard.writeText(inviteLink).then(() => {
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
         });
-    });
+    }
+
+    const copyBtn = document.getElementById('copy-btn');
+    if(copyBtn) {
+        copyBtn.addEventListener('click', () => {
+            const inviteLink = `${window.location.origin}/videoChat/${currentRoomCode}/member`;
+            navigator.clipboard.writeText(inviteLink).then(() => {
+                showToast('초대 링크가 복사되었습니다!');
+            });
+        });
+    }
+
+    // Schedule Room Logic (New Feature)
+    const scheduleBtn = document.getElementById('schedule-btn');
+    const scheduleInfo = document.getElementById('schedule-info');
+    const scheduleLinkSpan = document.getElementById('schedule-link');
+    let scheduledCode = '';
+
+    if(scheduleBtn) {
+        scheduleBtn.addEventListener('click', () => {
+            const timeInput = document.getElementById('schedule-time').value;
+            if(!timeInput) {
+                alert("예약할 날짜와 시간을 먼저 선택해주세요.");
+                return;
+            }
+            scheduledCode = generateShortCode();
+            const inviteLink = `${window.location.origin}/videoChat/${scheduledCode}/member`;
+            scheduleLinkSpan.textContent = inviteLink;
+            scheduleBtn.classList.add('hidden');
+            scheduleInfo.classList.remove('hidden');
+        });
+    }
+
+    const copyScheduleBtn = document.getElementById('copy-schedule-btn');
+    if(copyScheduleBtn) {
+        copyScheduleBtn.addEventListener('click', () => {
+            const inviteLink = `${window.location.origin}/videoChat/${scheduledCode}/member`;
+            navigator.clipboard.writeText(inviteLink).then(() => {
+                showToast('예약 링크가 클립보드에 복사되었습니다!');
+            });
+        });
+    }
 
     // Join Room Logic
     const joinBtn = document.getElementById('join-btn');
     const joinCodeInput = document.getElementById('join-code-input');
     const joinError = document.getElementById('join-error');
 
-    joinBtn.addEventListener('click', () => {
-        const code = joinCodeInput.value.trim();
-        const nameInput = document.getElementById('join-name-input');
-        const name = nameInput ? nameInput.value.trim() : '';
-        
-        if (code && name) {
-            window.location.href = `/videoChat/${code}/member?name=${encodeURIComponent(name)}`;
-        } else {
-            joinError.textContent = "코드와 이름을 모두 입력해주세요!";
-            joinError.classList.remove('hidden');
-            setTimeout(() => {
-                joinError.classList.add('hidden');
-            }, 2000);
-        }
-    });
+    if(joinBtn) {
+        joinBtn.addEventListener('click', () => {
+            const code = joinCodeInput.value.trim();
+            const nameInput = document.getElementById('join-name-input');
+            const name = nameInput ? nameInput.value.trim() : '';
+            
+            if (code && name) {
+                window.location.href = `/videoChat/${code}/member?name=${encodeURIComponent(name)}`;
+            } else {
+                joinError.textContent = "코드와 이름을 모두 입력해주세요!";
+                joinError.classList.remove('hidden');
+                setTimeout(() => joinError.classList.add('hidden'), 2000);
+            }
+        });
+    }
 
-    // Enter key support for join
-    joinCodeInput.addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            document.getElementById('join-name-input').focus();
-        }
-    });
+    if(joinCodeInput) {
+        joinCodeInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') document.getElementById('join-name-input').focus();
+        });
+    }
 
-    document.getElementById('join-name-input').addEventListener('keypress', (e) => {
-        if (e.key === 'Enter') {
-            joinBtn.click();
-        }
-    });
+    const joinNameInput = document.getElementById('join-name-input');
+    if(joinNameInput) {
+        joinNameInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') joinBtn.click();
+        });
+    }
 });
