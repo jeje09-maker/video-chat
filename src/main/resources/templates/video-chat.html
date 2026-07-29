@@ -12,9 +12,6 @@
     <link href="https://fonts.googleapis.com/css2?family=Noto+Sans&family=Noto+Sans+KR&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" />
     
-    <!-- Supabase SDK -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
     <!-- MediaPipe Selfie Segmentation -->
     <script src="https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/selfie_segmentation.js" crossorigin="anonymous"></script>
 
@@ -53,15 +50,6 @@
 </script>
 
 <div id="videoContainer">
-    <!-- 내비게이션 바 / 마이페이지 트리거 (절대 위치) -->
-    <div id="mypage-trigger" title="채팅 설정 열기" style="position: absolute; top: 15px; left: 15px; z-index: 300; cursor: pointer; display: flex; align-items: center; gap: 10px; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px); padding: 5px 15px 5px 5px; border-radius: 25px; border: 1px solid rgba(255,255,255,0.2); transition: all 0.2s; color: white;">
-        <div class="profile-avatar-container" style="position: relative; width: 36px; height: 36px;">
-            <img id="nav-profile-img" src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid #6366f1;">
-            <span class="status-indicator" style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; border: 2px solid #333; box-shadow: 0 0 5px rgba(46,204,113,0.5);"></span>
-        </div>
-        <span id="user-name" style="font-weight: 600; text-shadow: 1px 1px 2px rgba(0,0,0,0.8);"></span>
-    </div>
-
     <!-- 매니저 비디오 (왼쪽 절반) -->
     <div id="managerVideoContainer">
         <video id="managerVideo" autoplay muted></video>
@@ -211,7 +199,6 @@
         }
     };
 </script>
-<script src="/js/auth.js" defer></script>
 <script src='/js/webrtc.js?v=20260728_8'></script>
 <script type="module" src="/js/member-panel.js?v=20260728_8" defer></script>
 <script type="module" src="/js/video-grid.js?v=20260728_8" defer></script>
@@ -304,59 +291,5 @@
         });
     }
 </script>
-
-<!-- 마이페이지 모달 (video-chat 페이지용 스타일 일부 포함) -->
-<div id="mypage-modal" class="modal hidden" style="position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: flex; justify-content: center; align-items: center; z-index: 1000;">
-    <div class="modal-backdrop" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); backdrop-filter: blur(5px);"></div>
-    <div class="modal-content" style="background: white; border-radius: 20px; padding: 40px; width: 90%; max-width: 500px; position: relative; z-index: 1001; color: #333;">
-        <button id="close-mypage-btn" style="position: absolute; top: 15px; right: 20px; background: none; border: none; font-size: 24px; cursor: pointer;">&times;</button>
-        <div class="modal-header" style="text-align: center; margin-bottom: 30px;">
-            <h3 style="margin: 0; font-size: 24px;">마이페이지</h3>
-            <p style="margin: 5px 0 0 0; color: #666;">입장 시 기본 설정 및 나의 통계</p>
-        </div>
-        
-        <div class="mypage-stats" style="margin-bottom:20px; padding:15px; background:#f3f4f6; border-radius:12px; text-align:center;">
-            <span style="font-size:0.9rem; color:#666;">총 방 개설 횟수</span>
-            <div style="font-size:1.5rem; font-weight:700; color:#6366f1; margin-top:5px;" id="mypage-room-count">0회</div>
-        </div>
-
-        <div class="settings-group" style="text-align:left;">
-            <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <span class="label">마이크 기본 설정</span>
-                <input type="checkbox" id="mypage-mic-toggle" checked style="width: 20px; height: 20px;" />
-            </div>
-            <div class="setting-item" style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
-                <span class="label">비디오 기본 설정</span>
-                <input type="checkbox" id="mypage-video-toggle" checked style="width: 20px; height: 20px;" />
-            </div>
-            <div class="setting-item" style="margin-bottom:15px;">
-                <span class="label" style="display:block; margin-bottom:5px;">내 프로필 사진 (URL)</span>
-                <input type="text" id="mypage-profile-url" class="modern-input" placeholder="이미지 주소를 입력하세요" style="width: 100%; padding:10px; box-sizing: border-box; border: 1px solid #ccc; border-radius: 8px;" />
-            </div>
-            <div class="setting-item" style="margin-bottom:15px;">
-                <span class="label" style="display:block; margin-bottom:10px;">기본 배경화면 설정</span>
-                <select id="mypage-bg-select" class="modern-input" style="padding:10px; width: 100%; border: 1px solid #ccc; border-radius: 8px;">
-                    <option value="none">원본 (배경 없음)</option>
-                    <option value="blur">흐리게 (블러 처리)</option>
-                    <option value="office">아늑한 오피스</option>
-                </select>
-            </div>
-            <div class="setting-item" style="margin-bottom:15px;">
-                <span class="label" style="display:block; margin-bottom:10px;">비디오 꺼짐 시 화면</span>
-                <select id="mypage-video-off-select" class="modern-input" style="padding:10px; width: 100%; border: 1px solid #ccc; border-radius: 8px;">
-                    <option value="profile">내 프로필 사진 띄우기</option>
-                    <option value="icon">기본 사람 아이콘 띄우기</option>
-                </select>
-            </div>
-            <button id="mypage-save-btn" style="margin-top:20px; width: 100%; padding: 12px; background: #6366f1; color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 16px; font-weight: bold;">설정 저장하기</button>
-        </div>
-        <p id="mypage-message" class="hidden" style="color:#2ecc71; text-align: center; margin-top: 15px; display: none;"></p>
-    </div>
-</div>
-
-<style>
-    .hidden { display: none !important; }
-</style>
-
 </body>
 </html>

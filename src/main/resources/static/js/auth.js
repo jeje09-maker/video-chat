@@ -171,11 +171,63 @@ document.addEventListener('DOMContentLoaded', () => {
             if(mypageMicToggle) mypageMicToggle.checked = meta.mic !== false;
             if(mypageVideoToggle) mypageVideoToggle.checked = meta.video !== false;
             if(mypageBgSelect) mypageBgSelect.value = meta.bg || 'none';
-            if(mypageProfileUrl) mypageProfileUrl.value = meta.avatar_url || meta.picture || '';
+            if(mypageProfileUrl) {
+                const url = meta.avatar_url || meta.picture || '';
+                mypageProfileUrl.value = url;
+                const mypageProfilePreview = document.getElementById('mypage-profile-preview');
+                if(mypageProfilePreview) mypageProfilePreview.src = url || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+            }
             if(mypageVideoOffSelect) mypageVideoOffSelect.value = meta.video_off_mode || 'profile';
             
             if(mypageMessage) mypageMessage.classList.add('hidden');
             if(mypageModal) mypageModal.classList.remove('hidden');
+        });
+    }
+
+    const mypageUploadBtn = document.getElementById('mypage-upload-btn');
+    const mypageProfileUpload = document.getElementById('mypage-profile-upload');
+    const mypageProfilePreview = document.getElementById('mypage-profile-preview');
+
+    if (mypageUploadBtn && mypageProfileUpload) {
+        mypageUploadBtn.addEventListener('click', () => {
+            mypageProfileUpload.click();
+        });
+
+        mypageProfileUpload.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (!file) return;
+
+            const reader = new FileReader();
+            reader.onload = (event) => {
+                const img = new Image();
+                img.onload = () => {
+                    const canvas = document.createElement('canvas');
+                    const ctx = canvas.getContext('2d');
+                    
+                    canvas.width = 150;
+                    canvas.height = 150;
+                    
+                    const minSize = Math.min(img.width, img.height);
+                    const startX = (img.width - minSize) / 2;
+                    const startY = (img.height - minSize) / 2;
+                    
+                    ctx.drawImage(img, startX, startY, minSize, minSize, 0, 0, 150, 150);
+                    
+                    const dataUrl = canvas.toDataURL('image/jpeg', 0.8);
+                    if(mypageProfileUrl) mypageProfileUrl.value = dataUrl;
+                    if(mypageProfilePreview) mypageProfilePreview.src = dataUrl;
+                };
+                img.src = event.target.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    }
+
+    if (mypageProfileUrl) {
+        mypageProfileUrl.addEventListener('input', (e) => {
+            if(mypageProfilePreview) {
+                mypageProfilePreview.src = e.target.value || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+            }
         });
     }
 

@@ -225,15 +225,37 @@
                     </label>
                 </div>
                 <div class="setting-item" style="margin-bottom:15px;">
-                    <span class="label" style="display:block; margin-bottom:5px;">내 프로필 사진 (URL)</span>
-                    <input type="text" id="mypage-profile-url" class="modern-input" placeholder="이미지 주소를 입력하세요" style="width: 100%; padding:10px; box-sizing: border-box;" />
+                    <span class="label" style="display:block; margin-bottom:5px;">내 프로필 사진 설정</span>
+                    <div style="display: flex; gap: 10px; align-items: center; margin-bottom: 5px;">
+                        <img id="mypage-profile-preview" src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                        <input type="text" id="mypage-profile-url" class="modern-input" placeholder="이미지 URL 직접 입력" style="flex: 1; padding:10px; box-sizing: border-box;" />
+                    </div>
+                    <input type="file" id="mypage-profile-upload" accept="image/*" style="display: none;">
+                    <button id="mypage-upload-btn" type="button" style="width: 100%; padding: 8px; background: var(--bg-dark); color: white; border: none; border-radius: 8px; cursor: pointer; font-size: 0.9rem;">+ 내 기기에서 사진 업로드</button>
                 </div>
                 <div class="setting-item" style="margin-bottom:15px;">
                     <span class="label" style="display:block; margin-bottom:10px;">기본 배경화면 설정</span>
                     <select id="mypage-bg-select" class="modern-input" style="padding:10px; width: 100%;">
                         <option value="none">원본 (배경 없음)</option>
-                        <option value="blur">흐리게 (블러 처리)</option>
-                        <option value="office">아늑한 오피스</option>
+                        <option value="blur">배경흐림</option>
+                        <option value="https://images.unsplash.com/photo-1554118811-1e0d58224f24?auto=format&fit=crop&w=1280&q=80">카페</option>
+                        <option value="https://images.unsplash.com/photo-1464822759023-fed622ff2c3b?auto=format&fit=crop&w=1280&q=80">산</option>
+                        <option value="https://images.unsplash.com/photo-1507525428034-b723cf961d3e?auto=format&fit=crop&w=1280&q=80">해변</option>
+                        <option value="https://images.unsplash.com/photo-1519681393784-d120267933ba?auto=format&fit=crop&w=1280&q=80">밤하늘</option>
+                        <option value="https://images.unsplash.com/photo-1473580044384-7ba9967e16a0?auto=format&fit=crop&w=1280&q=80">사막</option>
+                        <option value="https://images.unsplash.com/photo-1448375240586-882707db888b?auto=format&fit=crop&w=1280&q=80">숲</option>
+                        <option value="https://images.unsplash.com/photo-1507842217343-583bb7270b66?auto=format&fit=crop&w=1280&q=80">도서관</option>
+                        <option value="https://images.unsplash.com/photo-1476514525535-07fb3b4ae5f1?auto=format&fit=crop&w=1280&q=80">강변</option>
+                        <option value="https://images.unsplash.com/photo-1513694203232-719a280e022f?auto=format&fit=crop&w=1280&q=80">스카이라운지</option>
+                        <option value="https://images.unsplash.com/photo-1533104816931-20fa691ff6ca?auto=format&fit=crop&w=1280&q=80">산토리니</option>
+                        <option value="https://images.unsplash.com/photo-1462331940025-496dfbfc7564?auto=format&fit=crop&w=1280&q=80">우주</option>
+                        <option value="https://images.unsplash.com/photo-1477959858617-67f85cf4f1df?auto=format&fit=crop&w=1280&q=80">도시야경</option>
+                        <option value="/images/under-sea.png">바다밑</option>
+                        <option value="https://images.unsplash.com/photo-1478265409131-1f65c88f965c?auto=format&fit=crop&w=1280&q=80">설원</option>
+                        <option value="https://images.unsplash.com/photo-1497366216548-37526070297c?auto=format&fit=crop&w=1280&q=80">사무실</option>
+                        <option value="/images/flower-field.png">꽃밭</option>
+                        <option value="https://images.unsplash.com/photo-1507371341162-763b5e419408?auto=format&fit=crop&w=1280&q=80">가을단풍</option>
+                        <option value="https://images.unsplash.com/photo-1517260739337-6799d239ce83?auto=format&fit=crop&w=1280&q=80">눈내리는마을</option>
                     </select>
                 </div>
                 <div class="setting-item" style="margin-bottom:15px;">
