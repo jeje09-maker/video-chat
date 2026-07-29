@@ -133,7 +133,12 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 소셜 로그인 공통 함수
     async function signInWithProvider(provider) {
-        const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: provider });
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({ 
+            provider: provider,
+            options: {
+                redirectTo: window.location.origin
+            }
+        });
         if (error) showError(error.message);
     }
 
