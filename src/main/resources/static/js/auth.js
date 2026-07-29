@@ -3,7 +3,7 @@ const SUPABASE_URL = 'https://qhqgyipsvcsanghyvhau.supabase.co';
 const SUPABASE_ANON_KEY = 'sb_publishable_2SniaLTf89_tcZQJ-PmdZw_0XirZos3';
 
 // Supabase 클라이언트 초기화
-const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
 let currentUser = null;
 let currentAuthMode = 'login'; // 'login' | 'signup'
@@ -109,7 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentAuthMode === 'signup') {
                 if (password !== passwordConfirm) return showError('비밀번호가 일치하지 않습니다.');
                 
-                const { data, error } = await supabase.auth.signUp({ 
+                const { data, error } = await supabaseClient.auth.signUp({ 
                     email, 
                     password,
                     options: {
@@ -125,7 +125,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 }
             } else {
                 // 로그인
-                const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+                const { data, error } = await supabaseClient.auth.signInWithPassword({ email, password });
                 if (error) showError(error.message);
             }
         });
@@ -133,7 +133,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     // 소셜 로그인 공통 함수
     async function signInWithProvider(provider) {
-        const { data, error } = await supabase.auth.signInWithOAuth({ provider: provider });
+        const { data, error } = await supabaseClient.auth.signInWithOAuth({ provider: provider });
         if (error) showError(error.message);
     }
 
@@ -146,7 +146,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const logoutBtn = document.getElementById('logout-btn');
     if(logoutBtn) {
         logoutBtn.addEventListener('click', async () => {
-            await supabase.auth.signOut();
+            await supabaseClient.auth.signOut();
         });
     }
 
@@ -182,7 +182,7 @@ document.addEventListener('DOMContentLoaded', () => {
             const video = mypageVideoToggle ? mypageVideoToggle.checked : true;
             const bg = mypageBgSelect ? mypageBgSelect.value : 'none';
             
-            const { data, error } = await supabase.auth.updateUser({
+            const { data, error } = await supabaseClient.auth.updateUser({
                 data: { mic: mic, video: video, bg: bg }
             });
             
@@ -219,7 +219,7 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    supabase.auth.onAuthStateChange((event, session) => {
+    supabaseClient.auth.onAuthStateChange((event, session) => {
         currentUser = session ? session.user : null;
         if (event === 'SIGNED_IN') {
             closeModal();
@@ -227,7 +227,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateUI();
     });
 
-    supabase.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(({ data: { session } }) => {
         currentUser = session ? session.user : null;
         updateUI();
     });
@@ -250,7 +250,7 @@ window.incrementRoomCount = async function() {
     const meta = currentUser.user_metadata || {};
     const count = (meta.room_count || 0) + 1;
     
-    const { data } = await supabase.auth.updateUser({
+    const { data } = await supabaseClient.auth.updateUser({
         data: { room_count: count }
     });
     if(data.user) currentUser = data.user;
