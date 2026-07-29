@@ -57,7 +57,8 @@ async function checkPermissionChanges() {
                 const cameraState = (await navigator.permissions.query({name: "camera"})).state;
                 const micState = (await navigator.permissions.query({name: "microphone"})).state;
 
-                if (cameraState !== lastCameraState || micState !== lastMicState) {
+                if ((cameraState !== lastCameraState && lastCameraState !== "prompt") || 
+                    (micState !== lastMicState && lastMicState !== "prompt")) {
                     location.reload();
                 }
 

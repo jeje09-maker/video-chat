@@ -124,7 +124,7 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     align-items: flex-end;
     padding-bottom: 20vh;
     justify-content: space-between;
-    padding: 120px 5% 15vh 5%;
+    padding: 120px 5% 50px 5%;
     gap: 30px;
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/images/hero-bg.png') no-repeat center center/cover;
 }
