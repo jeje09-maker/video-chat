@@ -43,6 +43,9 @@ document.addEventListener('DOMContentLoaded', () => {
         switchAuthTab(mode);
     }
     function closeModal() { authModal.classList.add('hidden'); }
+    
+    window.openModal = openModal;
+    window.closeModal = closeModal;
 
     function showError(msg, isSuccess = false) {
         if(authError) {
