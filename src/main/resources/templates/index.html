@@ -41,8 +41,11 @@
             </div>
             <!-- 로그인 후 -->
             <div id="user-profile" class="user-profile hidden" style="display: flex; align-items: center;">
-                <div id="mypage-trigger" title="마이페이지 열기" style="cursor: pointer; display: flex; align-items: center; gap: 8px; background: var(--bg-light); padding: 5px 15px; border-radius: 20px; border: 1px solid var(--border-light); margin-right: 15px; transition: all 0.2s;">
-                    <span class="avatar" style="font-size: 1.1rem;">🟢</span>
+                <div id="mypage-trigger" title="채팅 설정 열기" style="cursor: pointer; display: flex; align-items: center; gap: 10px; background: var(--bg-light); padding: 5px 15px 5px 5px; border-radius: 25px; border: 1px solid var(--border-light); margin-right: 15px; transition: all 0.2s;">
+                    <div class="profile-avatar-container" style="position: relative; width: 36px; height: 36px;">
+                        <img id="nav-profile-img" src="https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png" alt="Profile" style="width: 100%; height: 100%; border-radius: 50%; object-fit: cover; border: 2px solid var(--primary-color);">
+                        <span class="status-indicator" style="position: absolute; bottom: 0; right: 0; width: 12px; height: 12px; background-color: #2ecc71; border-radius: 50%; border: 2px solid white; box-shadow: 0 0 5px rgba(46,204,113,0.5);"></span>
+                    </div>
                     <span id="user-name" style="font-weight: 600;"></span>
                 </div>
                 <button id="logout-btn" class="text-btn">로그아웃</button>
@@ -222,11 +225,22 @@
                     </label>
                 </div>
                 <div class="setting-item" style="margin-bottom:15px;">
-                    <span class="label" style="display:block; margin-bottom:10px;">기본 배경화면</span>
-                    <select id="mypage-bg-select" class="modern-input" style="padding:10px;">
+                    <span class="label" style="display:block; margin-bottom:5px;">내 프로필 사진 (URL)</span>
+                    <input type="text" id="mypage-profile-url" class="modern-input" placeholder="이미지 주소를 입력하세요" style="width: 100%; padding:10px; box-sizing: border-box;" />
+                </div>
+                <div class="setting-item" style="margin-bottom:15px;">
+                    <span class="label" style="display:block; margin-bottom:10px;">기본 배경화면 설정</span>
+                    <select id="mypage-bg-select" class="modern-input" style="padding:10px; width: 100%;">
                         <option value="none">원본 (배경 없음)</option>
                         <option value="blur">흐리게 (블러 처리)</option>
                         <option value="office">아늑한 오피스</option>
+                    </select>
+                </div>
+                <div class="setting-item" style="margin-bottom:15px;">
+                    <span class="label" style="display:block; margin-bottom:10px;">비디오 꺼짐 시 화면</span>
+                    <select id="mypage-video-off-select" class="modern-input" style="padding:10px; width: 100%;">
+                        <option value="profile">내 프로필 사진 띄우기</option>
+                        <option value="icon">기본 사람 아이콘 띄우기</option>
                     </select>
                 </div>
                 <button id="mypage-save-btn" class="primary-btn" style="margin-top:20px;">설정 저장하기</button>

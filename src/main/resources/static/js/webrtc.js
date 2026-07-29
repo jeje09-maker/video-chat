@@ -28,8 +28,8 @@ if (!window.members) window.members = [];
 
 // WebSocket 연결
 const socketNameParam = userName ? `?name=${encodeURIComponent(userName)}` : '';
-const socket = new WebSocket(`wss://${location.host}/ws/${roomId}/${myType}${socketNameParam}`);
-
+const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+const socket = new WebSocket(`${protocol}//${location.host}/ws/${roomId}/${myType}${socketNameParam}`);
 socket.onopen = () => {
     console.log('WebSocket 연결 성공');
     setInterval(sendHeartbeat, 15000); // 15초

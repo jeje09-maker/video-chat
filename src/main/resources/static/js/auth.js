@@ -28,6 +28,8 @@ document.addEventListener('DOMContentLoaded', () => {
     const mypageMicToggle = document.getElementById('mypage-mic-toggle');
     const mypageVideoToggle = document.getElementById('mypage-video-toggle');
     const mypageBgSelect = document.getElementById('mypage-bg-select');
+    const mypageProfileUrl = document.getElementById('mypage-profile-url');
+    const mypageVideoOffSelect = document.getElementById('mypage-video-off-select');
     const mypageRoomCount = document.getElementById('mypage-room-count');
 
     // Auth Tabs
@@ -169,6 +171,8 @@ document.addEventListener('DOMContentLoaded', () => {
             if(mypageMicToggle) mypageMicToggle.checked = meta.mic !== false;
             if(mypageVideoToggle) mypageVideoToggle.checked = meta.video !== false;
             if(mypageBgSelect) mypageBgSelect.value = meta.bg || 'none';
+            if(mypageProfileUrl) mypageProfileUrl.value = meta.avatar_url || meta.picture || '';
+            if(mypageVideoOffSelect) mypageVideoOffSelect.value = meta.video_off_mode || 'profile';
             
             if(mypageMessage) mypageMessage.classList.add('hidden');
             if(mypageModal) mypageModal.classList.remove('hidden');
@@ -186,9 +190,11 @@ document.addEventListener('DOMContentLoaded', () => {
             const mic = mypageMicToggle ? mypageMicToggle.checked : true;
             const video = mypageVideoToggle ? mypageVideoToggle.checked : true;
             const bg = mypageBgSelect ? mypageBgSelect.value : 'none';
+            const avatarUrl = mypageProfileUrl ? mypageProfileUrl.value : '';
+            const videoOffMode = mypageVideoOffSelect ? mypageVideoOffSelect.value : 'profile';
             
             const { data, error } = await supabaseClient.auth.updateUser({
-                data: { mic: mic, video: video, bg: bg }
+                data: { mic: mic, video: video, bg: bg, avatar_url: avatarUrl, video_off_mode: videoOffMode }
             });
             
             if (error) {
@@ -215,7 +221,12 @@ document.addEventListener('DOMContentLoaded', () => {
             if(userNameEl) {
                 const meta = currentUser.user_metadata || {};
                 const email = currentUser.email;
-                userNameEl.textContent = meta.name || (email ? email.split('@')[0] : '사용자');
+                userNameEl.textContent = meta.name || meta.full_name || (email ? email.split('@')[0] : '사용자');
+                
+                const profileImg = document.getElementById('nav-profile-img');
+                if(profileImg) {
+                    profileImg.src = meta.avatar_url || meta.picture || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
+                }
             }
         } else {
             if(guestActions) guestActions.style.display = 'flex';
@@ -240,12 +251,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // 마이페이지에서 설정된 값을 index.js에서 활용할 수 있도록 노출
 window.getUserSettings = function() {
-    if(!currentUser) return { mic: true, video: true, bg: 'none' };
+    if(!currentUser) return { mic: true, video: true, bg: 'none', video_off_mode: 'profile' };
     const meta = currentUser.user_metadata || {};
     return {
         mic: meta.mic !== false,
         video: meta.video !== false,
-        bg: meta.bg || 'none'
+        bg: meta.bg || 'none',
+        video_off_mode: meta.video_off_mode || 'profile',
+        avatar_url: meta.avatar_url || meta.picture || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png'
     };
 };
 

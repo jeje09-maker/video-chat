@@ -121,9 +121,10 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
 .hero-section {
     min-height: 100vh;
     display: flex;
-    align-items: flex-start;
+    align-items: flex-end;
+    padding-bottom: 20vh;
     justify-content: space-between;
-    padding: 120px 5% 50px 5%;
+    padding: 120px 5% 15vh 5%;
     gap: 30px;
     background: linear-gradient(rgba(0,0,0,0.5), rgba(0,0,0,0.7)), url('/images/hero-bg.png') no-repeat center center/cover;
 }
@@ -134,7 +135,7 @@ body.dark-mode .text-btn { color: var(--text-sub-dark); }
     .hero-content { margin-top: 20px !important; }
 }
 
-.hero-content { flex: 1; color: white; max-width: 500px; margin-top: calc(45vh - 80px); }
+.hero-content { flex: 1; color: white; max-width: 500px; margin-bottom: 5vh; }
 .hero-title {
     font-size: 3.5rem;
     font-weight: 800;
@@ -166,7 +167,7 @@ body.dark-mode .hero-subtitle { color: rgba(255, 255, 255, 0.9); }
 body.dark-mode .badge { background: rgba(129, 140, 248, 0.2); color: #818cf8; }
 
 /* Action Panel (Glass Card) */
-.hero-action-panel { flex: 0.8; max-width: 420px; width: 100%; margin-top: calc(45vh - 80px); }
+.hero-action-panel { flex: 0.8; max-width: 420px; width: 100%; margin-bottom: 5vh; }
 .glass-card {
     background: var(--card-bg-light);
     backdrop-filter: blur(20px);
