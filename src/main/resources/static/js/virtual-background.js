@@ -60,7 +60,7 @@ function initSegmentation() {
     selfieSegmentation = new SelfieSegmentation({ locateFile: f =>
         `https://cdn.jsdelivr.net/npm/@mediapipe/selfie_segmentation/${f}`
     });
-    selfieSegmentation.setOptions({ modelSelection: 1 });
+    selfieSegmentation.setOptions({ modelSelection: 0 }); // 0: General (더 정밀한 경계선), 1: Landscape (빠름)
     selfieSegmentation.onResults(onResults);
 }
 
@@ -70,12 +70,13 @@ function onResults(results) {
     canvasCtx.clearRect(0, 0, canvasElement.width, canvasElement.height);
 
     canvasCtx.globalCompositeOperation = 'copy';
-    canvasCtx.filter = 'blur(4px)';
+    // Edge Feathering (경계선 부드럽게)
+    canvasCtx.filter = 'blur(6px)';
     canvasCtx.drawImage(results.segmentationMask, 0, 0, canvasElement.width, canvasElement.height);
 
     canvasCtx.globalCompositeOperation = 'source-out';
     if (bgType === 'blur') {
-        canvasCtx.filter = 'blur(20px)';
+        canvasCtx.filter = 'blur(15px)'; // 성능과 퀄리티 타협점
         canvasCtx.drawImage(results.image, 0, 0, canvasElement.width, canvasElement.height);
     } else if (bgImage && bgImage.complete && bgImage.naturalWidth !== 0) {
         canvasCtx.filter = 'none';
