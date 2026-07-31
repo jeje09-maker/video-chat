@@ -85,19 +85,45 @@
                                     <span th:unless="${user.canCreateRoom}" class="badge danger">제한됨</span>
                                 </td>
                                 <td>
-                                    <span th:if="${user.admin}" class="badge" style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">👑 관리자</span>
-                                    <span th:unless="${user.admin}" class="badge" style="background:#e0e0e0;color:#555;">일반</span>
+                                    <!-- 수퍼관리자 -->
+                                    <span th:if="${superAdmins.contains(user.email)}"
+                                          class="badge"
+                                          style="background:linear-gradient(135deg,#f7971e,#ffd200);color:#333;font-weight:700;">
+                                        👑 수퍼관리자
+                                    </span>
+                                    <!-- 일반 관리자 (수퍼관리자 아님) -->
+                                    <span th:if="${!superAdmins.contains(user.email) and user.admin}"
+                                          class="badge"
+                                          style="background:linear-gradient(135deg,#667eea,#764ba2);color:white;">
+                                        🔑 관리자
+                                    </span>
+                                    <!-- 일반 사용자 -->
+                                    <span th:if="${!superAdmins.contains(user.email) and !user.admin}"
+                                          class="badge"
+                                          style="background:#e0e0e0;color:#555;">
+                                        일반
+                                    </span>
                                 </td>
                                 <td style="display:flex;gap:6px;flex-wrap:wrap;">
+                                    <!-- 방 개설 권한 토글 -->
                                     <form th:action="@{/admin/toggle-permission}" method="post">
                                         <input type="hidden" name="email" th:value="${user.email}">
                                         <button type="submit" class="toggle-btn" th:classappend="${user.canCreateRoom ? 'revoke' : 'grant'}">
                                             <span th:text="${user.canCreateRoom ? '권한 회수' : '권한 부여'}">권한 변경</span>
                                         </button>
                                     </form>
-                                    <form th:action="@{/admin/toggle-admin}" method="post">
+                                    <!-- 관리자 지정/해제 (수퍼관리자는 변경 불가) -->
+                                    <span th:if="${superAdmins.contains(user.email)}"
+                                          class="badge"
+                                          style="background:#f0f0f0;color:#999;padding:6px 12px;border-radius:8px;font-size:0.8rem;">
+                                        🔒 변경불가
+                                    </span>
+                                    <form th:unless="${superAdmins.contains(user.email)}"
+                                          th:action="@{/admin/toggle-admin}" method="post">
                                         <input type="hidden" name="email" th:value="${user.email}">
-                                        <button type="submit" class="toggle-btn" th:classappend="${user.admin ? 'revoke' : 'grant'}" th:style="${user.admin ? 'background:linear-gradient(135deg,#764ba2,#667eea);color:white;border:none;' : 'background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;'}">
+                                        <button type="submit" class="toggle-btn"
+                                                th:classappend="${user.admin ? 'revoke' : 'grant'}"
+                                                th:style="${user.admin ? 'background:linear-gradient(135deg,#eb3349,#f45c43);color:white;border:none;' : 'background:linear-gradient(135deg,#667eea,#764ba2);color:white;border:none;'}">
                                             <span th:text="${user.admin ? '관리자 해제' : '관리자 지정'}">관리자 변경</span>
                                         </button>
                                     </form>

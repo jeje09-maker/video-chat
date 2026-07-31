@@ -281,10 +281,17 @@ document.addEventListener('DOMContentLoaded', () => {
                     profileImg.src = meta.avatar_url || meta.picture || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
                 }
             }
-            // [임시] 로그인한 모든 사용자에게 관리자 버튼 표시
-            // 추후 권한 체크 로직으로 교체 예정
+            // 관리자(수퍼관리자 포함)만 버튼 표시
             if (adminBtn) {
-                adminBtn.style.display = 'inline-block';
+                try {
+                    const emailToCheck = currentUser.email || '';
+                    const res = await fetch(`/api/users/check-permission?email=${encodeURIComponent(emailToCheck)}`);
+                    const data = await res.json();
+                    adminBtn.style.display = data.isAdmin ? 'inline-block' : 'none';
+                } catch(e) {
+                    console.error('관리자 권한 확인 실패:', e);
+                    adminBtn.style.display = 'none';
+                }
             }
         } else {
             if(guestActions) guestActions.style.display = 'flex';
