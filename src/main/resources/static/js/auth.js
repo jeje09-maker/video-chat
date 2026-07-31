@@ -266,7 +266,8 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    function updateUI() {
+    async function updateUI() {
+        const adminBtn = document.getElementById('nav-admin-btn');
         if (currentUser) {
             if(guestActions) guestActions.style.display = 'none';
             if(userProfile) userProfile.style.display = 'flex';
@@ -280,10 +281,24 @@ document.addEventListener('DOMContentLoaded', () => {
                     profileImg.src = meta.avatar_url || meta.picture || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
                 }
             }
+            if (adminBtn) {
+                try {
+                    const res = await fetch(`/api/users/check-permission?email=${encodeURIComponent(currentUser.email)}`);
+                    const data = await res.json();
+                    if (data.isAdmin) {
+                        adminBtn.style.display = 'inline-block';
+                    } else {
+                        adminBtn.style.display = 'none';
+                    }
+                } catch(e) {
+                    console.error('Failed to check admin status', e);
+                }
+            }
         } else {
             if(guestActions) guestActions.style.display = 'flex';
             if(userProfile) userProfile.style.display = 'none';
             if(userNameEl) userNameEl.textContent = '';
+            if(adminBtn) adminBtn.style.display = 'none';
         }
     }
 

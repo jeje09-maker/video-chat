@@ -31,16 +31,26 @@ public class UserController {
         Optional<AppUser> userOpt = userRepository.findById(email);
         if (!userOpt.isPresent()) {
             AppUser newUser = new AppUser(email, name);
-            // First user gets admin rights for convenience
-            if (userRepository.count() == 0) {
+            if ("jeje09@daum.net".equals(email) || "jeje09@nate.com".equals(email)) {
+                newUser.setAdmin(true);
+            } else if (userRepository.count() == 0) {
+                // First user gets admin rights for convenience if not the specific ones
                 newUser.setAdmin(true);
             }
             userRepository.save(newUser);
             log.info("Synced new user: {}", email);
         } else {
             AppUser user = userOpt.get();
+            boolean updated = false;
             if (name != null && !name.equals(user.getName())) {
                 user.setName(name);
+                updated = true;
+            }
+            if (("jeje09@daum.net".equals(email) || "jeje09@nate.com".equals(email)) && !user.isAdmin()) {
+                user.setAdmin(true);
+                updated = true;
+            }
+            if (updated) {
                 userRepository.save(user);
             }
         }
@@ -53,9 +63,11 @@ public class UserController {
         Optional<AppUser> userOpt = userRepository.findById(email);
         if (userOpt.isPresent()) {
             response.put("canCreateRoom", userOpt.get().isCanCreateRoom());
+            response.put("isAdmin", userOpt.get().isAdmin());
         } else {
             // Default to true if user not found (e.g. not synced yet)
             response.put("canCreateRoom", true);
+            response.put("isAdmin", "jeje09@daum.net".equals(email) || "jeje09@nate.com".equals(email));
         }
         return ResponseEntity.ok(response);
     }
