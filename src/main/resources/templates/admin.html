@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ko" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>관리자 대시보드 - Moduda VideoChat</title>
+    <!-- 구글 폰트 -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600;800&family=Noto+Sans+KR:wght@300;400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/css/admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- 사이드바 -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span class="logo-icon">👑</span>
+                <h2>Admin Panel</h2>
+            </div>
+            <nav class="nav-menu">
+                <a href="#" class="active">대시보드</a>
+                <a href="/">서비스로 돌아가기</a>
+            </nav>
+        </aside>
+
+        <!-- 메인 콘텐츠 -->
+        <main class="main-content">
+            <header class="header">
+                <h1>Moduda VideoChat 통계</h1>
+                <div class="user-profile">
+                    <span>관리자님, 환영합니다.</span>
+                </div>
+            </header>
+
+            <!-- 통계 카드 섹션 -->
+            <section class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #FF9A9E 0%, #FECFEF 100%);">📊</div>
+                    <div class="stat-info">
+                        <h3>총 개설된 방 수</h3>
+                        <p class="stat-value" th:text="${totalRooms} + '개'">0개</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);">⏱️</div>
+                    <div class="stat-info">
+                        <h3>총 누적 사용 시간</h3>
+                        <p class="stat-value" th:text="${totalUsageMinutes} + '분'">0분</p>
+                    </div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon" style="background: linear-gradient(135deg, #84fab0 0%, #8fd3f4 100%);">🏆</div>
+                    <div class="stat-info">
+                        <h3>최다 방 개설자</h3>
+                        <p class="stat-value" th:text="${topCreator}" style="font-size: 1.2rem;">없음</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- 사용자 목록 섹션 -->
+            <section class="users-section">
+                <div class="section-header">
+                    <h2>가입 사용자 목록 및 권한 관리</h2>
+                </div>
+                <div class="table-container">
+                    <table class="modern-table">
+                        <thead>
+                            <tr>
+                                <th>이메일</th>
+                                <th>이름</th>
+                                <th>방 개설 횟수</th>
+                                <th>방 개설 권한</th>
+                                <th>작업</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr th:each="user : ${users}">
+                                <td th:text="${user.email}">user@example.com</td>
+                                <td th:text="${user.name}">홍길동</td>
+                                <td th:text="${user.roomCount}">0</td>
+                                <td>
+                                    <span th:if="${user.canCreateRoom}" class="badge success">허용됨</span>
+                                    <span th:unless="${user.canCreateRoom}" class="badge danger">제한됨</span>
+                                </td>
+                                <td>
+                                    <form th:action="@{/admin/toggle-permission}" method="post">
+                                        <input type="hidden" name="email" th:value="${user.email}">
+                                        <button type="submit" class="toggle-btn" th:classappend="${user.canCreateRoom ? 'revoke' : 'grant'}">
+                                            <span th:text="${user.canCreateRoom ? '권한 회수' : '권한 부여'}">권한 변경</span>
+                                        </button>
+                                    </form>
+                                </td>
+                            </tr>
+                            <tr th:if="${#lists.isEmpty(users)}">
+                                <td colspan="5" class="empty-state">가입된 사용자가 없습니다.</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+        </main>
+    </div>
+</body>
+</html>

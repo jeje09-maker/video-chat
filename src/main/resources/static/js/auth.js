@@ -287,16 +287,35 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
+    async function syncUserToBackend(user) {
+        if (!user || !user.email) return;
+        const meta = user.user_metadata || {};
+        const name = meta.name || meta.full_name || user.email.split('@')[0];
+        try {
+            await fetch('/api/users/sync', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ email: user.email, name: name })
+            });
+        } catch (e) {
+            console.error("Backend sync failed", e);
+        }
+    }
+
     supabaseClient.auth.onAuthStateChange((event, session) => {
         currentUser = session ? session.user : null;
         if (event === 'SIGNED_IN') {
             closeModal();
+            syncUserToBackend(currentUser);
         }
         updateUI();
     });
 
     supabaseClient.auth.getSession().then(({ data: { session } }) => {
         currentUser = session ? session.user : null;
+        if (currentUser) {
+            syncUserToBackend(currentUser);
+        }
         updateUI();
     });
 });

@@ -17,12 +17,20 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.codegrass.videochat.service.RoomService;
+import com.codegrass.videochat.domain.RoomHistory;
+import org.springframework.beans.factory.annotation.Autowired;
+
 @Slf4j
 @Component
 public class WebSocketHandler extends TextWebSocketHandler {
 
+    @Autowired
+    private RoomService roomService;
+
     // 방 관리용 맵 (roomId -> session 목록)
     private final Map<String, Map<String, WebSocketSession>> rooms = new HashMap<>();
+    private final Map<String, RoomHistory> roomHistoryMap = new HashMap<>();
     private final Map<String, Boolean> roomManagerMap = new HashMap<>();
 
     // 방에 새 사용자가 들어올 때
@@ -55,6 +63,10 @@ public class WebSocketHandler extends TextWebSocketHandler {
                 } else {
                     log.info("[first-join] 매니저가 입장하였습니다. roomId = [{}], sessionId = [{}]", roomId, session);
                     roomManagerMap.put(roomId, true);
+                    
+                    String email = extractEmailFromUri(session);
+                    RoomHistory history = roomService.startRoom(roomId, email);
+                    roomHistoryMap.put(roomId, history);
                 }
             } else {
                 log.info("[first-join] 멤버가 입장하였습니다. roomId = [{}], sessionId = [{}]", roomId, session);
@@ -98,6 +110,16 @@ public class WebSocketHandler extends TextWebSocketHandler {
 
             rooms.get(roomId).remove(sessionId);
             broadcastToRoomExceptSender(roomId, "left-member", type, sessionId);
+            
+            if (rooms.get(roomId).isEmpty()) {
+                log.info("[left-member] 방이 비었습니다. 방 정보 삭제 roomId = [{}]", roomId);
+                rooms.remove(roomId);
+                roomManagerMap.remove(roomId);
+                RoomHistory history = roomHistoryMap.remove(roomId);
+                if (history != null) {
+                    roomService.endRoom(history);
+                }
+            }
 
         } catch (Exception e) {
             log.error("exception : ", e);
@@ -409,5 +431,22 @@ public class WebSocketHandler extends TextWebSocketHandler {
             return path.substring(path.lastIndexOf("/") + 1);
         }
         throw new IllegalStateException("URI 에서 type 추출 실패 : session.getUri() is null");
+    }
+
+    private String extractEmailFromUri(WebSocketSession session) {
+        URI uri = session.getUri();
+        if (uri != null && uri.getQuery() != null) {
+            try {
+                String[] params = uri.getQuery().split("&");
+                for (String param : params) {
+                    if (param.startsWith("email=")) {
+                        return java.net.URLDecoder.decode(param.substring(6), "UTF-8").trim();
+                    }
+                }
+            } catch (Exception e) {
+                log.error("Failed to parse email from query", e);
+            }
+        }
+        return "";
     }
 }

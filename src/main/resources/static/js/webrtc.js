@@ -27,7 +27,12 @@ window.localStream = null;
 if (!window.members) window.members = [];
 
 // WebSocket 연결
-const socketNameParam = userName ? `?name=${encodeURIComponent(userName)}` : '';
+const emailParam = urlParams.get('email');
+let socketNameParam = userName ? `?name=${encodeURIComponent(userName)}` : '';
+if (emailParam) {
+    socketNameParam += socketNameParam ? `&email=${encodeURIComponent(emailParam)}` : `?email=${encodeURIComponent(emailParam)}`;
+}
+
 const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
 const socket = new WebSocket(`${protocol}//${location.host}/ws/${roomId}/${myType}${socketNameParam}`);
 socket.onopen = () => {

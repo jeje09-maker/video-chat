@@ -53,7 +53,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentRoomCode = '';
 
     if(generateBtn) {
-        generateBtn.addEventListener('click', () => {
+        generateBtn.addEventListener('click', async () => {
+            if (window.currentUser) {
+                try {
+                    const res = await fetch(`/api/users/check-permission?email=${encodeURIComponent(window.currentUser.email)}`);
+                    const data = await res.json();
+                    if (!data.canCreateRoom) {
+                        alert("관리자에 의해 방 개설 권한이 제한되었습니다.");
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Permission check failed", e);
+                }
+            }
             currentRoomCode = generateShortCode();
             roomCodeSpan.textContent = currentRoomCode;
             generateBtn.classList.add('hidden');
@@ -70,7 +82,11 @@ document.addEventListener('DOMContentLoaded', () => {
             if (currentRoomCode && name) {
                 const settings = window.getUserSettings ? window.getUserSettings() : { mic: true, video: true, bg: 'none' };
                 if (window.incrementRoomCount) window.incrementRoomCount();
-                window.location.href = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}&mic=${settings.mic}&video=${settings.video}&bg=${settings.bg}`;
+                let url = `/videoChat/${currentRoomCode}/manager?name=${encodeURIComponent(name)}&mic=${settings.mic}&video=${settings.video}&bg=${settings.bg}`;
+                if (window.currentUser && window.currentUser.email) {
+                    url += `&email=${encodeURIComponent(window.currentUser.email)}`;
+                }
+                window.location.href = url;
             } else if (!name) {
                 if (createError) {
                     createError.classList.remove('hidden');
@@ -97,7 +113,19 @@ document.addEventListener('DOMContentLoaded', () => {
     let scheduledCode = '';
 
     if(scheduleBtn) {
-        scheduleBtn.addEventListener('click', () => {
+        scheduleBtn.addEventListener('click', async () => {
+            if (window.currentUser) {
+                try {
+                    const res = await fetch(`/api/users/check-permission?email=${encodeURIComponent(window.currentUser.email)}`);
+                    const data = await res.json();
+                    if (!data.canCreateRoom) {
+                        alert("관리자에 의해 방 개설 권한이 제한되었습니다.");
+                        return;
+                    }
+                } catch (e) {
+                    console.error("Permission check failed", e);
+                }
+            }
             const timeInput = document.getElementById('schedule-time').value;
             if(!timeInput) {
                 alert("예약할 날짜와 시간을 먼저 선택해주세요.");
