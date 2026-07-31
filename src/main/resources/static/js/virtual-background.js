@@ -108,8 +108,16 @@ async function _startCanvasPipeline() {
     }
 
     const settings = videoTrack.getSettings();
-    canvasElement.width  = settings.width  || 640;
-    canvasElement.height = settings.height || 480;
+    const vw = settings.width  || 640;
+    const vh = settings.height || 480;
+
+    // [성능 최적화] 처리 해상도 제한 (최대 480p)
+    // 원본이 720p/1080p일 경우 연산량이 기하급수적으로 늘어나므로 스케일 다운
+    const MAX_HEIGHT = 480;
+    const scale = vh > MAX_HEIGHT ? (MAX_HEIGHT / vh) : 1;
+    
+    canvasElement.width  = vw * scale;
+    canvasElement.height = vh * scale;
 
     hiddenVideo.srcObject = new MediaStream([videoTrack]);
     await new Promise(resolve => {
