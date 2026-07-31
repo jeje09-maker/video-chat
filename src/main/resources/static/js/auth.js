@@ -281,18 +281,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     profileImg.src = meta.avatar_url || meta.picture || 'https://upload.wikimedia.org/wikipedia/commons/7/7c/Profile_avatar_placeholder_large.png';
                 }
             }
+            // [임시] 로그인한 모든 사용자에게 관리자 버튼 표시
+            // 추후 권한 체크 로직으로 교체 예정
             if (adminBtn) {
-                try {
-                    const res = await fetch(`/api/users/check-permission?email=${encodeURIComponent(currentUser.email)}`);
-                    const data = await res.json();
-                    if (data.isAdmin) {
-                        adminBtn.style.display = 'inline-block';
-                    } else {
-                        adminBtn.style.display = 'none';
-                    }
-                } catch(e) {
-                    console.error('Failed to check admin status', e);
-                }
+                adminBtn.style.display = 'inline-block';
             }
         } else {
             if(guestActions) guestActions.style.display = 'flex';
@@ -317,21 +309,21 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    supabaseClient.auth.onAuthStateChange((event, session) => {
+    supabaseClient.auth.onAuthStateChange(async (event, session) => {
         currentUser = session ? session.user : null;
         if (event === 'SIGNED_IN') {
             closeModal();
-            syncUserToBackend(currentUser);
+            await syncUserToBackend(currentUser); // 백엔드 동기화 완료 후 UI 업데이트
         }
-        updateUI();
+        await updateUI();
     });
 
-    supabaseClient.auth.getSession().then(({ data: { session } }) => {
+    supabaseClient.auth.getSession().then(async ({ data: { session } }) => {
         currentUser = session ? session.user : null;
         if (currentUser) {
-            syncUserToBackend(currentUser);
+            await syncUserToBackend(currentUser); // 백엔드 동기화 완료 후 UI 업데이트
         }
-        updateUI();
+        await updateUI();
     });
 });
 

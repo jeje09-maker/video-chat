@@ -55,4 +55,16 @@ public class AdminController {
         }
         return "redirect:/admin";
     }
+
+    @PostMapping("/admin/toggle-admin")
+    public String toggleAdmin(@RequestParam String email) {
+        Optional<AppUser> userOpt = userRepository.findById(email);
+        if (userOpt.isPresent()) {
+            AppUser user = userOpt.get();
+            user.setAdmin(!user.isAdmin());
+            userRepository.save(user);
+            log.info("Admin status toggled for user: {} -> {}", email, user.isAdmin());
+        }
+        return "redirect:/admin";
+    }
 }
