@@ -24,7 +24,9 @@ public class AdminController {
     private final RoomHistoryRepository roomHistoryRepository;
 
     // 수퍼관리자 이메일 (하드코딩, 절대 변경 불가)
-    private static final java.util.Set<String> SUPER_ADMINS = java.util.Set.of("jeje09@nate.com", "jeje09@daum.net");
+    private static final java.util.Set<String> SUPER_ADMINS =
+        java.util.Collections.unmodifiableSet(
+            new java.util.HashSet<>(java.util.Arrays.asList("jeje09@nate.com", "jeje09@daum.net")));
 
     @GetMapping("/admin")
     public String adminPage(Model model) {

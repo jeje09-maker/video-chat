@@ -58,7 +58,9 @@ public class UserController {
     }
 
     // 수퍼관리자 이메일 (변경 불가)
-    private static final java.util.Set<String> SUPER_ADMINS = java.util.Set.of("jeje09@nate.com", "jeje09@daum.net");
+    private static final java.util.Set<String> SUPER_ADMINS =
+        java.util.Collections.unmodifiableSet(
+            new java.util.HashSet<>(java.util.Arrays.asList("jeje09@nate.com", "jeje09@daum.net")));
 
     @GetMapping("/check-permission")
     public ResponseEntity<Map<String, Boolean>> checkPermission(@RequestParam String email) {
